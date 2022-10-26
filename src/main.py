@@ -4,7 +4,7 @@ import argparse
 import networkx as nx
 import numpy as np
 
-from src.utils.strategies import get_strategy
+from utils.strategies import get_strategy
 from utils.help_functions import remove_edges
 from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss
 

@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import scipy.linalg as slg
 
-from src.utils.help_functions import regularise_and_invert
+from utils.help_functions import regularise_and_invert
 
 torch.set_default_tensor_type('torch.DoubleTensor')
 
