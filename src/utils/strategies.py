@@ -103,10 +103,13 @@ def wasserstein_initialisation(L1_inv, L2_inv):
 
 
 def loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type):
-    if loss_type == 'w':
-        L1_inv = torch.from_numpy(L1_inv.astype(np.double))
-        L2_inv = torch.from_numpy(L2_inv.astype(np.double))
+    # Convert Matrices to torch tensors
+    L1 = torch.from_numpy(L1.astype(np.double))
+    L2 = torch.from_numpy(L2.astype(np.double))
+    L1_inv = torch.from_numpy(L1_inv.astype(np.double))
+    L2_inv = torch.from_numpy(L2_inv.astype(np.double))
 
+    if loss_type == 'w':
         [C1_tilde, C2_tilde] = params
         loss_c = torch.trace(L1_inv) + torch.trace(torch.transpose(DS, 0, 1) @ L2_inv @ DS)
         # svd version
