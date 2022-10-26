@@ -9,9 +9,9 @@ def l2_loss(x, y, P):
     return np.sum((y @ P - P @ x)**2, axis=1).sum()
 
 
-def l2_inv_loss(x, y, P):
+def l2_inv_loss(x, y, P, alpha=0.1, ones=True):
     """Compute the L2 distance between x_inv and P.T @ y_inv @ P"""
-    x_inv, y_inv = regularise_and_invert(x, y, alpha=0.1, ones=True)
+    x_inv, y_inv = regularise_and_invert(x, y, alpha, ones)
     return np.sum((y_inv @ P - P @ x_inv)**2, axis=1).sum()
 
 

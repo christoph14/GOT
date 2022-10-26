@@ -104,6 +104,8 @@ def wasserstein_initialisation(L1_inv, L2_inv):
 
 def loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type):
     # Convert Matrices to torch tensors
+    if isinstance(DS, np.ndarray):
+        DS = torch.from_numpy(DS.astype(np.double))
     L1 = torch.from_numpy(L1.astype(np.double))
     L2 = torch.from_numpy(L2.astype(np.double))
     L1_inv = torch.from_numpy(L1_inv.astype(np.double))
