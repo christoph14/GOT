@@ -2,27 +2,29 @@ import networkx as nx
 import numpy as np
 
 
-def remove_edges(L, block_size, between_probability, within_probability=0.5, seed=None):
-    n = L.shape[0]
+def remove_edges(G, communities, between_probability, within_probability=0.5, seed=None):
+    if not nx.is_connected(G):
+        raise ValueError("G must be connected.")
+
     if seed is None:
         rng = np.random.default_rng()
     else:
         rng = seed
-    A = -L.copy()
-    np.fill_diagonal(A, 0)
 
-    for i in range(n):
-        for j in range(i, n):
-            if np.floor(i / block_size) == np.floor(j / block_size):
-                removal_probability = within_probability
-            else:
-                removal_probability = between_probability
-            if rng.random() < removal_probability:
-                A[i, j] = 0
-                A[j, i] = 0
-    L_reduced = nx.laplacian_matrix(nx.from_numpy_array(A))
-    L_reduced = np.double(np.array(L_reduced.todense()))
-    return L_reduced
+    G_new = G.copy()
+    for u, v in G_new.edges:
+        if communities[u] == communities[v]:
+            p = within_probability
+        else:
+            p = between_probability
+
+        # Remove edge with given probability
+        if rng.random() < p:
+            G_new.remove_edge(u, v)
+
+        if not nx.is_connected(G_new):
+            G_new.add_edge(u, v)
+    return G_new
 
 
 def regularise_and_invert(x, y, alpha, ones):
