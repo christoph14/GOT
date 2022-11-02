@@ -87,7 +87,8 @@ for p in p_values:
         l2_errors[name].append(l2_error)
         l2_inv_errors[name].append(l2_inv_error)
         np.savetxt(f'{args.path}/permutation_{name}_{p}#{args.seed}.csv', l2_inv_errors[name])
-    print(f'p = {p:.2f} done.')
+    if not args.ignore_log:
+        print(f'p = {p:.2f} done.')
 
 # Save results
 os.makedirs(args.path, exist_ok=True)
