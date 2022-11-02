@@ -86,6 +86,7 @@ for p in p_values:
         w2_errors[name].append(w2_error)
         l2_errors[name].append(l2_error)
         l2_inv_errors[name].append(l2_inv_error)
+        np.savetxt(f'{args.path}/permutation_{name}_{p}#{args.seed}.csv', l2_inv_errors[name])
     print(f'p = {p:.2f} done.')
 
 # Save results
