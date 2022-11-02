@@ -20,6 +20,14 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
+    elif strategy_name == 'random':
+        def strategy(L1, L2):
+            rng = np.random.default_rng()
+            n = L1.shape[0]
+            idx = rng.permutation(n)
+            P = np.eye(n)
+            P = P[idx, :]
+            return P
     else:
         raise NotImplementedError("Only strategies 'GOT', 'L2', 'L2-inv' are implemented.")
     return strategy
