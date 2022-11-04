@@ -132,9 +132,9 @@ def loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type):
     #     term2 = torch.logdet(L1) - torch.logdet(yy)
     #     cost = 0.5*(term1 - K + term2)
     elif loss_type == 'l2':
-        cost = torch.sum((L2 @ DS - DS @ L1) ** 2, dim=1).sum()
+        cost = torch.sum((DS.T @ L2 @ DS - L1) ** 2, dim=1).sum()
     elif loss_type == 'l2-inv':
-        cost = torch.sum((L2_inv @ DS - DS @ L1_inv) ** 2, dim=1).sum()
+        cost = torch.sum((DS.T @ L2_inv @ DS - L1_inv) ** 2, dim=1).sum()
     else:
         raise ValueError("loss_type must be 'w', 'l2' or 'l2-inv'.")
     return cost
