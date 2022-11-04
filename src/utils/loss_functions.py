@@ -5,14 +5,14 @@ from utils.help_functions import regularise_and_invert
 
 
 def l2_loss(x, y, P):
-    """Compute the L2 distance between x and P.T @ y @ P"""
-    return np.sum((y @ P - P @ x)**2, axis=1).sum()
+    """Compute the Frobeniusnorm of x - P.T @ y @ P"""
+    return np.linalg.norm(x - P.T @ y @ P, ord='fro')
 
 
 def l2_inv_loss(x, y, P, alpha=0.1, ones=True):
-    """Compute the L2 distance between x_inv and P.T @ y_inv @ P"""
+    """Compute the Frobeniusnorm of x_inv - P.T @ y_inv @ P"""
     x_inv, y_inv = regularise_and_invert(x, y, alpha, ones)
-    return np.sum((y_inv @ P - P @ x_inv)**2, axis=1).sum()
+    return np.linalg.norm(x_inv - P.T @ y_inv @ P, ord='fro')
 
 
 def w2_loss(x, y, P, alpha=0.1, ones=True):
