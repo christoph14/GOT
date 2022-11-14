@@ -4,6 +4,7 @@ import argparse
 import networkx as nx
 import numpy as np
 
+from utils import check_soft_assignment
 from utils.strategies import get_strategy
 from utils.help_functions import remove_edges
 from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss
@@ -34,8 +35,9 @@ strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampli
 
 # Set parameters for block stochastic model
 n = 40
-block_size = int(n/4)
-blocks = [block_size, block_size, block_size, block_size]
+n_blocks = 4
+block_size = int(n/n_blocks)
+blocks = [block_size] * n_blocks
 probs = [[0.70, 0.05, 0.05, 0.05],
          [0.05, 0.70, 0.05, 0.05],
          [0.05, 0.05, 0.70, 0.05],
