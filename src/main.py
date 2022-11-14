@@ -24,6 +24,9 @@ parser.add_argument('--path', dest='path', type=str, default='../results/', help
 parser.add_argument('--ignore_log', dest='ignore_log', action='store_const', const=True, default=False, help='disables the log')
 args = parser.parse_args()
 
+# Create results folder
+os.makedirs(args.path, exist_ok=True)
+
 # Get strategies
 strategy_names = args.strategies
 strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampling_size, epochs=args.iterations,
