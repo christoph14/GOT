@@ -78,6 +78,12 @@ for p in p_values:
     for strategy, name in zip(strategies, strategy_names):
         # Find permutation
         P_estimated = strategy(L1, L2)
+        try:
+            P_estimated = check_soft_assignment(P_estimated, atol=0.01)
+        except ValueError as e:
+            print(e)
+            print('Col sums:', P_estimated.sum(axis=0))
+            print('Row sums:', P_estimated.sum(axis=1))
 
         # Calculate and save different loss functions
         w2_error = w2_loss(L1, L2, P_estimated, args.alpha, ones=args.regularize)
