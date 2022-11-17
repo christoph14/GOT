@@ -1,6 +1,8 @@
 import numpy as np
+import networkx as nx
 import torch
 import scipy.linalg as slg
+import ot
 
 from utils.help_functions import regularise_and_invert
 
@@ -20,6 +22,9 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
+    elif strategy_name == 'GW':
+        def strategy(L1, L2):
+            return gw_strategy(L1, L2)
     elif strategy_name == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng()
@@ -89,6 +94,32 @@ def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42,
     #     plt.show()
 
     return P
+
+
+def gw_strategy(L1, L2):
+    """Determines the permutation matrix for two given graphs.
+
+    Parameters
+    ----------
+    L1 : array-like of shape (n, n)
+         Laplacian matrix of the first graph.
+    L2 : array-like of shape (n, n)
+         Laplacian matrix of the first graph.
+
+    Returns
+    -------
+    transportation_matrix : numpy.ndarray of shape (n, n)
+        The calculated transportation matrix.
+    """
+    G1 = nx.from_numpy_matrix(np.diag(np.diag(L1)) - L1)
+    C1 = nx.floyd_warshall_numpy(G1)
+    G2 = nx.from_numpy_matrix(np.diag(np.diag(L2)) - L2)
+    C2 = nx.floyd_warshall_numpy(G2)
+
+    p = ot.unif(len(C1))
+    q = ot.unif(len(C2))
+    gw, log = ot.gromov.entropic_gromov_wasserstein(C1, C2, p, q, 'square_loss', epsilon=4e-2, max_iter=2000, log=True, verbose=False)
+    return len(L1) * gw
 
 
 def doubly_stochastic(P, tau, it):
