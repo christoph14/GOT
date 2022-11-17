@@ -39,3 +39,10 @@ def regularise_invert_one(x, alpha, ones):
     else:
         x_reg = np.linalg.pinv(x) + alpha * np.eye(len(x))
     return x_reg
+
+
+def graph_from_laplacian(L):
+    A = -L.copy()
+    np.fill_diagonal(A, 0)
+    G = nx.from_numpy_array(A)
+    return G
