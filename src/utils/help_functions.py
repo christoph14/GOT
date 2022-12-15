@@ -46,3 +46,18 @@ def graph_from_laplacian(L):
     np.fill_diagonal(A, 0)
     G = nx.from_numpy_array(A)
     return G
+
+
+def random_permutation(n, random_seed=None):
+    if random_seed is None:
+        rng = np.random.default_rng()
+    elif isinstance(random_seed, int):
+        rng = np.random.default_rng(random_seed)
+    elif isinstance(random_seed, np.random.Generator):
+        rng = random_seed
+    else:
+        raise ValueError("random_seed must be None, int, or np.random.Generator.")
+    idx = rng.permutation(n)
+    permutation = np.eye(n)
+    permutation = permutation[idx, :]
+    return permutation
