@@ -5,6 +5,7 @@ import scipy.linalg as slg
 import ot
 
 from utils.help_functions import regularise_and_invert
+from fGOT import fgot_mgd
 
 torch.set_default_tensor_type('torch.DoubleTensor')
 
@@ -22,6 +23,20 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
+    elif strategy_name == 'fGOT':
+        def strategy(L1, L2, epsilon=0.006, method='got'):
+            n = len(L1)
+            m = len(L2)
+            p = np.repeat(1 / n, n)
+            q = np.repeat(1 / m, m)
+            max_iter = 500
+            g1 = get_filters(L1, method, tau)
+            g2 = get_filters(L2, method, tau)
+
+            gw, log = fgot_mgd.fgot(g1, g2, p, q, epsilon * np.max(g1) * np.max(g2) / n, max_iter=max_iter, tol=1e-9,
+                                    verbose=False, log=True, lapl=True)
+            gw *= n
+            return gw.T
     elif strategy_name == 'GW':
         def strategy(L1, L2):
             return gw_strategy(L1, L2)
@@ -169,3 +184,21 @@ def loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type):
     else:
         raise ValueError("loss_type must be 'w', 'l2' or 'l2-inv'.")
     return cost
+
+
+def get_filters(L1, method, tau=0.2):
+    if method == 'got':
+        g1 = np.real(slg.sqrtm(fgot_mgd.regularise_invert_one(L1, alpha=0.1, ones=False)))
+    elif method == 'weight':
+        g1 = np.diag(np.diag(L1)) - L1
+    elif method == 'heat':
+        g1 = slg.expm(-tau * L1)
+    elif method == 'sqrtL':
+        g1 = np.real(slg.sqrtm(L1))
+    elif method == 'L':
+        g1 = L1
+    elif method == 'sq':
+        g1 = L1 @ L1
+    else:
+        raise ValueError("The given method is not valid.")
+    return g1
