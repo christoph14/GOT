@@ -15,12 +15,13 @@ permutation_matrices = []
 y = []
 
 n = 20
+graphs_per_class = 10
 
 # Stochastic Block Model with 2 blocks (SBM2)
 sizes = [10, 10]
 p = [[0.65, 0.1],
      [0.1, 0.65]]
-for _ in range(20):
+for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p)
     # print(G.number_of_edges())
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
@@ -35,7 +36,7 @@ sizes = [8, 8, 4]
 p = [[0.8, 0.17, 0.17],
      [0.17, 0.8, 0.17],
      [0.17, 0.17, 0.8]]
-for _ in range(20):
+for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p)
     # print(G.number_of_edges())
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
@@ -46,7 +47,7 @@ for _ in range(20):
     y.append(1)
 
 # random regular graph (RG)
-for _ in range(20):
+for _ in range(graphs_per_class):
     G = nx.random_regular_graph(7, n)
     # print(G.number_of_edges())
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
@@ -57,7 +58,7 @@ for _ in range(20):
     y.append(2)
 
 # Barabasy-Albert model (BA)
-for _ in range(20):
+for _ in range(graphs_per_class):
     G = nx.barabasi_albert_graph(n, 5)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
@@ -67,7 +68,7 @@ for _ in range(20):
     y.append(3)
 
 # Watts-Strogatz model (WS)
-for _ in range(20):
+for _ in range(graphs_per_class):
     G = nx.watts_strogatz_graph(n, k=8, p=0.2)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
