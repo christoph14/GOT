@@ -1,13 +1,15 @@
-import numpy as np
 import networkx as nx
-import torch
-import scipy.linalg as slg
+import numpy as np
 import ot
+import pygmtools as pygm
+import scipy.linalg as slg
+import torch
 
-from utils.help_functions import regularise_and_invert
 from fGOT import fgot_mgd
+from utils.help_functions import regularise_and_invert, graph_from_laplacian
 
 torch.set_default_tensor_type('torch.DoubleTensor')
+pygm.BACKEND = 'numpy'
 
 
 def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.0, ones=True):
@@ -40,6 +42,42 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
     elif strategy_name == 'GW':
         def strategy(L1, L2):
             return gw_strategy(L1, L2)
+    elif strategy_name.lower() == 'rrmw':
+        def strategy(L1, L2):
+            G1 = graph_from_laplacian(L1)
+            G2 = graph_from_laplacian(L2)
+            n1 = G1.number_of_nodes()
+            n2 = G2.number_of_nodes()
+            A1 = nx.adjacency_matrix(G1).todense()
+            A2 = nx.adjacency_matrix(G2).todense()
+
+            conn1, edge1 = pygm.utils.dense_to_sparse(A1)
+            conn2, edge2 = pygm.utils.dense_to_sparse(A2)
+            import functools
+            gaussian_aff = functools.partial(pygm.utils.gaussian_aff_fn, sigma=.1)  # set affinity function
+            K = pygm.utils.build_aff_mat(None, edge1, conn1, None, edge2, conn2, [n1], None, [n2], None,
+                                         edge_aff_fn=gaussian_aff)
+            X = pygm.rrwm(K, n1, n2) * n1
+            X = pygm.hungarian(X)
+            return X.T
+    elif strategy_name.lower() == 'ipfp':
+        def strategy(L1, L2):
+            G1 = graph_from_laplacian(L1)
+            G2 = graph_from_laplacian(L2)
+            n1 = G1.number_of_nodes()
+            n2 = G2.number_of_nodes()
+            A1 = nx.adjacency_matrix(G1).todense()
+            A2 = nx.adjacency_matrix(G2).todense()
+
+            conn1, edge1 = pygm.utils.dense_to_sparse(A1)
+            conn2, edge2 = pygm.utils.dense_to_sparse(A2)
+            import functools
+            gaussian_aff = functools.partial(pygm.utils.gaussian_aff_fn, sigma=.1)  # set affinity function
+            K = pygm.utils.build_aff_mat(None, edge1, conn1, None, edge2, conn2, [n1], None, [n2], None,
+                                         edge_aff_fn=gaussian_aff)
+            X = pygm.ipfp(K, n1, n2) * n1
+            X = pygm.hungarian(X)
+            return X.T
     elif strategy_name == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng()
@@ -49,7 +87,9 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             P = P[idx, :]
             return P
     else:
-        raise NotImplementedError("Only strategies 'GOT', 'L2', 'L2-inv' are implemented.")
+        raise NotImplementedError(
+            "Only strategies 'GOT', 'L2', 'L2-inv', fGOT, GW, RRMW, IPFP, random are implemented."
+        )
     return strategy
 
 
