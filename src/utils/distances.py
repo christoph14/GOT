@@ -9,13 +9,13 @@ def wasserstein_distance(A, B):
     ----------
     A : array-like of shape (n, n)
         Covariance matrix of the first distribution.
-    B : float
-        Calculated Wasserstein distance.
+    B : array-like of shape (n, n)
+        Covariance matrix of the first distribution.
 
     Returns
     -------
-    distance : numpy.ndarray of shape (n, n)
-        The calculated transportation matrix.
+    distance : float
+        Calculated Wasserstein distance.
     """
     Root_1 = slg.sqrtm(A)
     result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(Root_1 @ B @ Root_1))
