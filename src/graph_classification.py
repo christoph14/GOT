@@ -1,4 +1,5 @@
 import sys
+import argparse
 
 import networkx as nx
 import numpy as np
@@ -8,6 +9,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from utils.distances import wasserstein_distance
 from utils.help_functions import random_permutation
 from utils.strategies import get_strategy
+
+# ArgumentParser
+parser = argparse.ArgumentParser(description='Evaluates graph classification algorithms.')
+parser.add_argument('strategy', type=str, help='the strategy to be performed')
+args = parser.parse_args()
 
 graphs = []
 permuted_graphs = []
@@ -77,7 +83,7 @@ for _ in range(graphs_per_class):
     permutation_matrices.append(P)
     y.append(4)
 
-strategy = get_strategy('L2', it=10, tau=5, n_samples=30, epochs=1500,
+strategy = get_strategy(args.strategy, it=10, tau=5, n_samples=30, epochs=1500,
                         lr=0.2, alpha=0.1, ones=True, verbose=False)
 alignment_matrices = []
 for idx, (L, L_permuted) in enumerate(zip(graphs, permuted_graphs)):
