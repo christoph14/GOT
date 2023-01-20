@@ -151,29 +151,34 @@ def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42,
     return P
 
 
-def gw_strategy(L1, L2):
+def gw_strategy(L1, L2, epsilon=0.04, max_iter=2000):
     """Determines the permutation matrix for two given graphs.
 
     Parameters
     ----------
     L1 : array-like of shape (n, n)
-         Laplacian matrix of the first graph.
+        Laplacian matrix of the first graph.
     L2 : array-like of shape (n, n)
-         Laplacian matrix of the first graph.
-
+        Laplacian matrix of the first graph.
+    epsilon : float
+        Regularization term > 0.
+    max_iter : int, default=2000
+        Max number of iterations.
     Returns
     -------
     transportation_matrix : numpy.ndarray of shape (n, n)
         The calculated transportation matrix.
     """
-    G1 = nx.from_numpy_matrix(np.diag(np.diag(L1)) - L1)
+    G1 = nx.from_numpy_array(np.diag(np.diag(L1)) - L1)
     C1 = nx.floyd_warshall_numpy(G1)
-    G2 = nx.from_numpy_matrix(np.diag(np.diag(L2)) - L2)
+    G2 = nx.from_numpy_array(np.diag(np.diag(L2)) - L2)
     C2 = nx.floyd_warshall_numpy(G2)
 
     p = ot.unif(len(C1))
     q = ot.unif(len(C2))
-    gw, log = ot.gromov.entropic_gromov_wasserstein(C1, C2, p, q, 'square_loss', epsilon=4e-2, max_iter=2000, log=True, verbose=False)
+    gw, log = ot.gromov.entropic_gromov_wasserstein(
+        C1, C2, p, q, 'square_loss', epsilon=epsilon, max_iter=max_iter, log=True, verbose=False
+    )
     return len(L1) * gw
 
 
