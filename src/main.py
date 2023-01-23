@@ -86,9 +86,9 @@ for p in p_values:
         try:
             P_estimated = check_soft_assignment(P_estimated, atol=0.01)
         except ValueError as e:
-            print(e)
             print('Col sums:', P_estimated.sum(axis=0))
             print('Row sums:', P_estimated.sum(axis=1))
+            raise e
 
         # Calculate and save different loss functions
         w2_error = w2_loss(L1, L2, P_estimated, args.alpha, ones=args.regularize)
