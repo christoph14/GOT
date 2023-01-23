@@ -28,6 +28,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
                                 alpha=alpha, ones=ones)
     elif strategy_name == 'fGOT':
         def strategy(L1, L2, epsilon=0.006, method='got'):
+            # To avoid "Warning: numerical errors at iteration 0" increase epsilon
             n = len(L1)
             m = len(L2)
             p = np.repeat(1 / n, n)
@@ -44,6 +45,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return gw_strategy(L1, L2)
     elif strategy_name.lower() == 'rrmw':
+        # Reweighted Random Walks for Graph Matching
         def strategy(L1, L2):
             G1 = graph_from_laplacian(L1)
             G2 = graph_from_laplacian(L2)
@@ -62,6 +64,8 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             X = pygm.hungarian(X)
             return X.T
     elif strategy_name.lower() == 'ipfp':
+        # Integer Projected Fixed Point from
+        # "An integer projected fixed point method for graph matching and map inference."
         def strategy(L1, L2):
             G1 = graph_from_laplacian(L1)
             G2 = graph_from_laplacian(L2)
