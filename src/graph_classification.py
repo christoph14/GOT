@@ -21,15 +21,14 @@ permutation_matrices = []
 y = []
 
 n = 20
-graphs_per_class = 10
+graphs_per_class = 20
 
 # Stochastic Block Model with 2 blocks (SBM2)
 sizes = [10, 10]
-p = [[0.65, 0.1],
-     [0.1, 0.65]]
+p = [[0.75, 0.15],
+     [0.15, 0.75]]
 for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p)
-    # print(G.number_of_edges())
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
     graphs.append(L)
@@ -39,12 +38,11 @@ for _ in range(graphs_per_class):
 
 # Stochastic Block Model with 3 blocks (SBM3)
 sizes = [8, 8, 4]
-p = [[0.8, 0.17, 0.17],
-     [0.17, 0.8, 0.17],
-     [0.17, 0.17, 0.8]]
+p = [[0.80, 0.25, 0.25],
+     [0.25, 0.80, 0.25],
+     [0.25, 0.25, 0.80]]
 for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p)
-    # print(G.number_of_edges())
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
     graphs.append(L)
@@ -54,8 +52,10 @@ for _ in range(graphs_per_class):
 
 # random regular graph (RG)
 for _ in range(graphs_per_class):
-    G = nx.random_regular_graph(7, n)
-    # print(G.number_of_edges())
+    # Exactly (n/2) * degree edges
+    # 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, ...
+    degree = 8
+    G = nx.random_regular_graph(degree, n)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
     graphs.append(L)
@@ -65,7 +65,9 @@ for _ in range(graphs_per_class):
 
 # Barabasy-Albert model (BA)
 for _ in range(graphs_per_class):
-    G = nx.barabasi_albert_graph(n, 5)
+    # Exactly (n-m) * m edges
+    # 19, 36, 51, 64, 75, 84, 91, 96, 99, 100, 99, 96, ...
+    G = nx.barabasi_albert_graph(n, 6)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
     graphs.append(L)
@@ -75,6 +77,8 @@ for _ in range(graphs_per_class):
 
 # Watts-Strogatz model (WS)
 for _ in range(graphs_per_class):
+    # Exactly (n/2) * k edges, k even
+    # 20, 40, 60, 80, 100, ...
     G = nx.watts_strogatz_graph(n, k=8, p=0.2)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n)
