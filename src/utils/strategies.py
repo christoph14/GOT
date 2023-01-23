@@ -6,6 +6,7 @@ import scipy.linalg as slg
 import torch
 
 from fGOT import fgot_mgd
+from utils.gromov_wasserstein_strategy import gw_strategy
 from utils.help_functions import regularise_and_invert, graph_from_laplacian
 
 torch.set_default_tensor_type('torch.DoubleTensor')
@@ -39,7 +40,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
                                     verbose=False, log=True, lapl=True)
             gw *= n
             return gw.T
-    elif strategy_name == 'GW':
+    elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
             return gw_strategy(L1, L2)
     elif strategy_name.lower() == 'rrmw':
@@ -151,7 +152,7 @@ def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42,
     return P
 
 
-def gw_strategy(L1, L2, epsilon=0.04, max_iter=2000):
+def gw_strategy_entropic(L1, L2, epsilon=0.04, max_iter=2000):
     """Determines the permutation matrix for two given graphs.
 
     Parameters
@@ -159,11 +160,12 @@ def gw_strategy(L1, L2, epsilon=0.04, max_iter=2000):
     L1 : array-like of shape (n, n)
         Laplacian matrix of the first graph.
     L2 : array-like of shape (n, n)
-        Laplacian matrix of the first graph.
+        Laplacian matrix of the second graph.
     epsilon : float
         Regularization term > 0.
     max_iter : int, default=2000
         Max number of iterations.
+    
     Returns
     -------
     transportation_matrix : numpy.ndarray of shape (n, n)
