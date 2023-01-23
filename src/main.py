@@ -5,8 +5,9 @@ import networkx as nx
 import numpy as np
 
 from utils import check_soft_assignment
+from utils.distances import gw_distance
 from utils.strategies import get_strategy
-from utils.help_functions import remove_edges
+from utils.help_functions import remove_edges, graph_from_laplacian
 from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss
 
 
@@ -47,10 +48,12 @@ probs = [[0.70, 0.05, 0.05, 0.05],
 w2_errors = {}
 l2_errors = {}
 l2_inv_errors = {}
+gw_errors ={}
 for name in strategy_names:
     w2_errors[name] = []
     l2_errors[name] = []
     l2_inv_errors[name] = []
+    gw_errors[name] = []
 
 # Create random generator
 rng = np.random.default_rng(seed=args.seed)
@@ -91,12 +94,15 @@ for p in p_values:
             raise e
 
         # Calculate and save different loss functions
+        G_aligned = graph_from_laplacian(P_estimated.T @ L2 @ P_estimated)
         w2_error = w2_loss(L1, L2, P_estimated, args.alpha, ones=args.regularize)
         l2_error = l2_loss(L1, L2, P_estimated)
         l2_inv_error = l2_inv_loss(L1, L2, P_estimated, args.alpha, ones=args.regularize)
+        gw_error = gw_distance(G1, G_aligned)
         w2_errors[name].append(w2_error)
         l2_errors[name].append(l2_error)
         l2_inv_errors[name].append(l2_inv_error)
+        gw_errors[name].append(gw_error)
         np.savetxt(f'{args.path}/permutation_{name}_{p}#{args.seed}.csv', P_estimated)
     if not args.ignore_log:
         print(f'p = {p:.2f} done.')
@@ -107,3 +113,4 @@ for name in strategy_names:
     np.savetxt(f'{args.path}/l2_inv_error_{name}#{args.seed}.csv', l2_inv_errors[name])
     np.savetxt(f'{args.path}/w2_error_{name}#{args.seed}.csv', w2_errors[name])
     np.savetxt(f'{args.path}/l2_error_{name}#{args.seed}.csv', l2_errors[name])
+    np.savetxt(f'{args.path}/gw_error_{name}#{args.seed}.csv', gw_errors[name])
