@@ -85,7 +85,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return X.T
     elif strategy_name == 'random':
         def strategy(L1, L2):
-            rng = np.random.default_rng()
+            rng = np.random.default_rng(seed)
             n = L1.shape[0]
             idx = rng.permutation(n)
             P = np.eye(n)
