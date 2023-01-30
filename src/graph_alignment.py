@@ -16,6 +16,11 @@ from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss
 parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
 parser.add_argument('strategies', type=str, nargs='+', help='the strategies to be performed')
 parser.add_argument('seed', type=int, help='the used random seed')
+# Experiment parameters
+parser.add_argument('--within_probability', dest='within_probability', type=float, default=0.7)
+parser.add_argument('--between_probability', dest='between_probability', type=float, default=0.1)
+parser.add_argument('--graph_size', dest='graph_size', type=int, default=40)
+# GOT parameters
 parser.add_argument('--alpha', dest='alpha', type=float, default=0.1, help='prior for xpal')
 parser.add_argument('--it', dest='it', type=int, default=10, help='number of Sinkhorn iterations')
 parser.add_argument('--tau', dest='tau', type=float, default=5, help='the Sinkhorn parameter')
@@ -36,14 +41,16 @@ strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampli
                            lr=args.lr, alpha=0.1, ones=args.regularize, verbose=False) for name in strategy_names]
 
 # Set parameters for block stochastic model
-n = 40
+n = args.graph_size
+p = args.within_probability
+q = args.between_probability
 n_blocks = 4
 block_size = int(n/n_blocks)
 blocks = [block_size] * n_blocks
-probs = [[0.70, 0.05, 0.05, 0.05],
-         [0.05, 0.70, 0.05, 0.05],
-         [0.05, 0.05, 0.70, 0.05],
-         [0.05, 0.05, 0.05, 0.70]]
+probs = [[p, q, q, q],
+         [q, p, q, q],
+         [q, q, p, q],
+         [q, q, q, p]]
 
 # Create dictionaries
 w2_errors = {}
