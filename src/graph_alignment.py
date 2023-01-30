@@ -68,8 +68,7 @@ rng = np.random.default_rng(seed=args.seed)
 
 # Generate original graph
 G1 = nx.stochastic_block_model(blocks, probs, seed=args.seed)
-# G1 = er_generator(40)
-L1 = nx.laplacian_matrix(G1).todense()
+L1 = nx.laplacian_matrix(G1, range(n)).todense()
 assert nx.is_connected(G1), 'G1 is not connected.'
 communities = {}
 for node in G1.nodes:
@@ -80,12 +79,9 @@ idx = rng.permutation(n)
 P_true = np.eye(n)
 P_true = P_true[idx, :]
 
-# print(f'{len([e for e in G1.edges() if communities[e[0]] != communities[e[1]]])} nodes between communities.')
-# print(f'{len([e for e in G1.edges() if communities[e[0]] == communities[e[1]]])} nodes within communities.')
-p_values = [0, 0.05, 0.1, 0.6]
+p_values = [0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 for p in p_values:
-    G_reduced = remove_edges(G1, communities, between_probability=p, within_probability=0.2, seed=rng)
-    # print(f'{nx.number_of_edges(G1)} edges, {nx.number_of_edges(G1) - nx.number_of_edges(G_reduced)} edges removed.')
+    G_reduced = remove_edges(G1, communities, between_probability=p, within_probability=0.5, seed=rng)
     L_reduced = nx.laplacian_matrix(G_reduced, range(n)).todense()
     L2 = P_true @ L_reduced @ P_true.T
 
@@ -113,9 +109,6 @@ for p in p_values:
         l2_inv_errors[name].append(l2_inv_error)
         gw_errors[name].append(gw_error)
         np.savetxt(f'{args.path}/permutation_{name}_{p}#{args.seed}.csv', P_estimated)
-        a = L1
-        b = P_estimated.T @ L2 @ P_estimated
-        # print(f'loss {name:6} : {l2_error:3.3f}')
     if not args.ignore_log:
         print(f'p = {p:.2f} done.')
 
