@@ -6,6 +6,7 @@ import scipy.linalg as slg
 import torch
 
 from fGOT import fgot_mgd
+from fGOT.got_nips import find_permutation
 from utils.gromov_wasserstein_strategy import gw_strategy
 from utils.help_functions import regularise_and_invert, graph_from_laplacian
 
@@ -18,6 +19,12 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
+    elif strategy_name.lower() == 'got-original':
+        def strategy(L1, L2):
+            _, _, permutation = find_permutation(
+                L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', alpha=alpha, ones=ones
+            )
+            return permutation
     elif strategy_name == 'L2':
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2', seed=seed, verbose=verbose,
