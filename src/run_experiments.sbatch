@@ -6,6 +6,7 @@
 #SBATCH --partition=main
 #SBATCH --ntasks=1
 #SBATCH --mem-per-cpu=3G
+#SBATCH --time 60
 
 module load python/3.9.6
 
