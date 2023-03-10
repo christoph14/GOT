@@ -6,12 +6,12 @@ except FileNotFoundError:
     pass
 
 iterations = 25
-algorithms = ['GOT', 'L2', 'L2-inv']
+algorithms = ['GOT', 'L2', 'random', 'gw']
 
 text = ""
 
 for algo in algorithms:
     for seed in range(iterations):
-        text += f'python3 -u main.py {algo} {seed} --iterations 1000 --regularize\n'
+        text += f'python3 -u main.py {algo} {seed} --within_probability 0.7 --between_probability 0.1 --path ../results/07-01\n'
 with open('experiment_commands.txt', 'a') as file:
     file.write(text)
