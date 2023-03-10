@@ -17,7 +17,7 @@ pygm.BACKEND = 'numpy'
 
 def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.0, ones=True):
     """Return a strategy computing a transport plan from L1 to L2."""
-    if strategy_name == 'GOT':
+    if strategy_name.lower() == 'got':
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
@@ -27,15 +27,15 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
                 L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', alpha=alpha, ones=ones, graphs=False
             )
             return permutation
-    elif strategy_name == 'L2':
+    elif strategy_name.lower() == 'l2':
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
-    elif strategy_name == 'L2-inv':
+    elif strategy_name.lower() == 'l2-inv':
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
-    elif strategy_name == 'fGOT':
+    elif strategy_name.lower() == 'fgot':
         def strategy(L1, L2, epsilon=0.006, method='got'):
             # To avoid "Warning: numerical errors at iteration 0" increase epsilon
             max_iter = 1000
@@ -93,7 +93,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             X = pygm.ipfp(K, n1, n2) * n1
             X = pygm.hungarian(X)
             return X.T
-    elif strategy_name == 'random':
+    elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng(seed)
             n = L1.shape[0]
@@ -103,7 +103,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return P
     else:
         raise NotImplementedError(
-            "Only strategies 'GOT', 'L2', 'L2-inv', fGOT, GW, RRMW, IPFP, random are implemented."
+            "Only strategies 'GOT', 'L2', 'L2-inv', fGOT, GW, RRMW, IPFP, and random are implemented."
         )
     return strategy
 
