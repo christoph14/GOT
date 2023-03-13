@@ -98,7 +98,7 @@ for p in p_values:
 
         # Calculate and save different loss functions
         G_aligned = graph_from_laplacian(P_estimated.T @ L2 @ P_estimated)
-        w2_error = w2_loss(L1, L2, P_estimated, args.alpha, ones=True)
+        w2_error = w2_loss(L1, L2, P_estimated)
         l2_error = l2_loss(L1, L2, P_estimated)
         l2_inv_error = l2_inv_loss(L1, L2, P_estimated, args.alpha, ones=True)
         gw_error = gw_distance(G1, G_aligned)
