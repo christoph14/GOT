@@ -1,3 +1,5 @@
+import warnings
+
 import networkx as nx
 import numpy as np
 
@@ -8,22 +10,46 @@ def remove_edges(G, communities, between_probability, within_probability=0.5, se
 
     if seed is None:
         rng = np.random.default_rng()
+    elif isinstance(seed, int):
+        rng = np.random.default_rng(seed)
     else:
         rng = seed
 
     G_new = G.copy()
+
+    # Count number of edges within and between communities
+    n_within = 0
+    n_between = 0
     for u, v in G_new.edges:
         if communities[u] == communities[v]:
-            p = within_probability
+            n_within += 1
         else:
-            p = between_probability
+            n_between += 1
 
-        # Remove edge with given probability
-        if rng.random() < p:
-            G_new.remove_edge(u, v)
+    # Remove edges
+    removed_within = 0
+    removed_between = 0
+    for u, v in rng.permutation(G_new.edges):
+        if communities[u] == communities[v]:
+            if removed_within < np.floor(n_within * within_probability):
+                G_new.remove_edge(u, v)
+                if nx.is_connected(G_new):
+                    removed_within += 1
+                else:
+                    G_new.add_edge(u, v)
+        else:
+            if removed_between < np.floor(n_between * between_probability):
+                G_new.remove_edge(u, v)
+                if nx.is_connected(G_new):
+                    removed_between += 1
+                else:
+                    G_new.add_edge(u, v)
 
-        if not nx.is_connected(G_new):
-            G_new.add_edge(u, v)
+    # Check if enough edges could be removed
+    if removed_within < np.floor(n_within * within_probability):
+        warnings.warn("Could not remove enough edges within the communities.")
+    if between_probability < np.floor(n_between * between_probability):
+        warnings.warn("Could not remove enough edges between the communities.")
     return G_new
 
 

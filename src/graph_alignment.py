@@ -79,7 +79,7 @@ P_true = P_true[idx, :]
 
 p_values = [0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 for p in p_values:
-    G_reduced = remove_edges(G1, communities, between_probability=p, within_probability=0.5, seed=rng)
+    G_reduced = remove_edges(G1, communities, between_probability=p, within_probability=0.5, seed=args.seed)
     L_reduced = nx.laplacian_matrix(G_reduced, range(n)).todense()
     L2 = P_true @ L_reduced @ P_true.T
 
