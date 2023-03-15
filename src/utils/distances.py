@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-import ot
 import scipy.linalg as slg
 
 
@@ -19,8 +18,8 @@ def wasserstein_distance(A, B):
     distance : float
         Calculated Wasserstein distance.
     """
-    Root_1 = slg.sqrtm(A)
-    result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(Root_1 @ B @ Root_1))
+    root = slg.sqrtm(A)
+    result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(root @ B @ root))
     distance = np.abs(result.real)
     return distance
 
@@ -46,9 +45,6 @@ def gw_distance(G1, G2):
     C1 = nx.floyd_warshall_numpy(G1)
     C2 = nx.floyd_warshall_numpy(G2)
 
-    # Define the initial distributions
-    p = ot.unif(len(C1))
-    q = ot.unif(len(C2))
-
-    distance = ot.gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', log=False, armijo=False, G0=None)
+    n = len(C1)
+    distance = (np.linalg.norm(C1 - C2, ord='fro') / n)**2
     return distance
