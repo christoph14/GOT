@@ -5,10 +5,9 @@ import pygmtools as pygm
 import scipy.linalg as slg
 import torch
 
-from alignment import got_strategy
+from alignment import got_strategy, gw_strategy
 from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
-from utils.gromov_wasserstein_strategy import gw_strategy
 from utils.help_functions import graph_from_laplacian
 
 torch.set_default_tensor_type('torch.DoubleTensor')
