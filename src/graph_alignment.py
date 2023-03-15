@@ -1,5 +1,6 @@
 import os
 import argparse
+import sqlite3
 
 import networkx as nx
 import numpy as np
@@ -63,6 +64,7 @@ for name in strategy_names:
     l2_errors[name] = []
     l2_inv_errors[name] = []
     gw_errors[name] = []
+data = []
 
 # Create random generator
 rng = np.random.default_rng(seed=args.seed)
@@ -105,11 +107,37 @@ for p in p_values:
         l2_errors[name].append(l2_error)
         l2_inv_errors[name].append(l2_inv_error)
         gw_errors[name].append(gw_error)
-        np.savetxt(f'{args.path}/permutation_{name}_{p}#{args.seed}.csv', P_estimated)
+        data.append(
+            {'strategy' : name,
+             'seed' : args.seed,
+             'p' : p,
+             'w2_loss' : w2_error,
+             'l2_loss' : l2_error,
+             'gw_loss' : gw_error}
+        )
     if not args.ignore_log:
         print(f'p = {p:.2f} done.')
 
-# Save results
+# Save results in database
+con = sqlite3.connect(f'{args.path}/results.db')
+cur = con.cursor()
+try:
+    cur.execute('''CREATE TABLE alignment (
+                       STRATEGY TEXT NOT NULL,
+                       SEED TEXT NOT NULL,
+                       P REAL NOT NULL,
+                       W2_LOSS REAL,
+                       L2_LOSS REAL,
+                       GW_LOSS REAL,
+                       unique (STRATEGY, SEED, P)
+                   )''')
+except sqlite3.OperationalError:
+    pass
+
+cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss, :gw_loss)"
+                " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss, gw_loss=excluded.gw_loss", data)
+con.commit()
+
 os.makedirs(args.path, exist_ok=True)
 for name in strategy_names:
     np.savetxt(f'{args.path}/l2_inv_error_{name}#{args.seed}.csv', l2_inv_errors[name])
