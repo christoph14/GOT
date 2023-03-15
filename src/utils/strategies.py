@@ -49,7 +49,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             gw, log = fgot_mgd.fgot(g1, g2, p, q, epsilon * np.max(g1) * np.max(g2) / n, max_iter=max_iter, tol=tol,
                                     verbose=False, log=True, lapl=True)
             gw *= n
-            return gw
+            return gw.T
     elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
             return gw_strategy(L1, L2)
