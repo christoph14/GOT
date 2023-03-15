@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def check_permutation_matrix(P, atol=1e-3):
+def check_permutation_matrix(P, atol=1e-03):
     P = np.array(P)
     if not P.ndim == 2:
         raise ValueError("P.ndim is not 2.")
@@ -16,7 +16,7 @@ def check_permutation_matrix(P, atol=1e-3):
     return np.round(P).astype(int)
 
 
-def check_soft_assignment(P, atol=0.001):
+def check_soft_assignment(P, atol=1e-03):
     P = np.array(P)
     if not P.ndim == 2:
         raise ValueError("P.ndim is not 2.")
