@@ -26,8 +26,11 @@ parser.add_argument('--tau', dest='tau', type=float, default=5, help='the Sinkho
 parser.add_argument('--sampling_size', dest='sampling_size', type=int, default=30, help='the sampling size')
 parser.add_argument('--iterations', dest='iterations', type=int, default=3000, help='the number of iterations')
 parser.add_argument('--lr', dest='lr', type=float, default=0.2, help='the learning rate')
+# General parameters
 parser.add_argument('--path', dest='path', type=str, default='../results/', help='the path to store the output files')
 parser.add_argument('--ignore_log', dest='ignore_log', action='store_const', const=True, default=False, help='disables the log')
+parser.add_argument('--allow_soft_assignment', dest='allow_soft_assignment', action='store_const', const=True,
+                    default=False, help='allow soft assignment instead of a permutation matrix')
 args = parser.parse_args()
 
 # Create results folder
@@ -87,14 +90,10 @@ for p in p_values:
     for strategy, name in zip(strategies, strategy_names):
         # Find permutation
         P_estimated = strategy(L1, L2)
-        try:
-            P_estimated = check_soft_assignment(P_estimated, atol=0.01)
-        except ValueError as e:
-            print(f'Error in seed {args.seed}')
-            print('Col sums:', P_estimated.sum(axis=0))
-            print('Row sums:', P_estimated.sum(axis=1))
-            raise e
-        P_estimated = check_permutation_matrix(P_estimated)
+        if args.allow_soft_assignment:
+            P_estimated = check_soft_assignment(P_estimated, atol=1e-02)
+        else:
+            P_estimated = check_permutation_matrix(P_estimated, atol=1e-02)
 
         # Calculate and save different loss functions
         G_aligned = graph_from_laplacian(P_estimated.T @ L2 @ P_estimated)
