@@ -133,3 +133,7 @@ dmypy.json
 
 # Results, images ...
 results/
+fGOT-master/
+src/FGW-master/
+plots/
+results.db
