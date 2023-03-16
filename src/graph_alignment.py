@@ -40,7 +40,7 @@ os.makedirs(args.path, exist_ok=True)
 # Get strategies
 strategy_names = args.strategies
 strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampling_size, epochs=args.iterations,
-                           lr=args.lr, alpha=0.1, ones=True, verbose=False) for name in strategy_names]
+                           lr=args.lr, alpha=args.alpha, ones=True, verbose=False) for name in strategy_names]
 
 if not args.ignore_log:
     print('Algorithms:', args.strategies)

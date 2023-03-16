@@ -14,7 +14,7 @@ torch.set_default_tensor_type('torch.DoubleTensor')
 pygm.BACKEND = 'numpy'
 
 
-def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.0, ones=True):
+def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.1, ones=True):
     """Return a strategy computing a transport plan from L1 to L2."""
     if strategy_name.lower() == 'got':
         def strategy(L1, L2):
