@@ -1,0 +1,7 @@
+numpy
+scipy
+networkx
+pot
+pygmtools
+pytorch
+scikit-learn
