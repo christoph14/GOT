@@ -35,14 +35,15 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
     elif strategy_name.lower() == 'fgot':
-        def strategy(L1, L2, epsilon=0.006, method='got'):
+        def strategy(L1, L2, epsilon=0.015, method='got'):
             # To avoid "Warning: numerical errors at iteration 0" increase epsilon
-            max_iter = 1000
+            max_iter = epochs
             tol = 1e-9
             n = len(L1)
             m = len(L2)
             p = np.repeat(1 / n, n)
             q = np.repeat(1 / m, m)
+            # TODO different tau than GOT?
             g1 = get_filters(L1, method, tau)
             g2 = get_filters(L2, method, tau)
 
