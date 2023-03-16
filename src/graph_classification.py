@@ -3,11 +3,12 @@ import argparse
 
 import networkx as nx
 import numpy as np
-from sklearn.metrics import confusion_matrix
+from matplotlib import pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, zero_one_loss
 from sklearn.neighbors import KNeighborsClassifier
 
-from utils.distances import wasserstein_distance
-from utils.help_functions import random_permutation
+from utils.distances import wasserstein_distance, gw_distance
+from utils.help_functions import random_permutation, graph_from_laplacian
 from utils.strategies import get_strategy
 
 # ArgumentParser
@@ -95,7 +96,13 @@ for idx, (L, L_permuted) in enumerate(zip(graphs, permuted_graphs)):
     sys.stdout.write(f'\r{idx+1} graphs done.')
 
 aligned_graphs = [P.T @ L @ P for L, P in zip(permuted_graphs, alignment_matrices)]
-distances = [[wasserstein_distance(L, L_aligned) for L in graphs] for L_aligned in aligned_graphs]
+
+if args.strategy.lower() in ['got', 'fgot']:
+    distances = [[wasserstein_distance(L, L_aligned) for L in graphs] for L_aligned in aligned_graphs]
+elif args.strategy.lower() in ['gw']:
+    distances = [[gw_distance(graph_from_laplacian(L), graph_from_laplacian(L_aligned)) for L in graphs] for L_aligned in aligned_graphs]
+else:
+    distances = [[np.linalg.norm(L - L_aligned, ord='fro') for L in graphs] for L_aligned in aligned_graphs]
 
 y = np.array(y)
 knn = KNeighborsClassifier(n_neighbors=1, metric='precomputed').fit(distances, y)
@@ -104,3 +111,8 @@ indices = indices[:, 0]
 y_pred = y[indices]
 print()
 print(confusion_matrix(y, y_pred))
+print('Correct classifications:', np.trace(confusion_matrix(y, y_pred)))
+ConfusionMatrixDisplay.from_predictions(y, y_pred, colorbar=False)
+plt.title(f'{args.strategy}: {100-zero_one_loss(y, y_pred, normalize=False)}/100')
+plt.savefig(f'../plots/confusion_matrix_{args.strategy}.pdf', bbox_inches='tight')
+plt.show()
