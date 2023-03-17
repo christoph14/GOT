@@ -123,7 +123,7 @@ for p in p_values:
         print(f'p = {p:.2f} done.')
 
 # Save results in database
-con = sqlite3.connect(f'{args.path}/fgot_results.db')
+con = sqlite3.connect(f'{args.path}/fgot_results.db', timeout=100)
 cur = con.cursor()
 if args.reset_results:
     cur.execute('''DROP TABLE alignment''')
