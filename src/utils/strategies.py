@@ -94,21 +94,21 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             X = pygm.ipfp(K, n1, n2) * n1
             X = pygm.hungarian(X)
             return X.T
-    elif strategy_name.lower() == 'plsq':
+    elif strategy_name.lower().T == 'plsq':
         def strategy(L1, L2):
             return PLsq(L1, L2) * len(L1)
-    elif strategy_name.lower() == 'pgot':
+    elif strategy_name.lower().T == 'pgot':
         def strategy(L1, L2):
             return Pgot(L1, L2) * len(L1)
-    elif strategy_name.lower() == 'pstoh':
+    elif strategy_name.lower().T == 'pstoh':
         def strategy(L1, L2):
             return PstoH(L1, L2) * len(L1)
     elif strategy_name.lower() == 'p_nv2':
         def strategy(L1, L2):
-            return P_nv2(L1, L2) * len(L1)
+            return P_nv2(L1, L2).T * len(L1)
     elif strategy_name.lower() == 'pgw':
         def strategy(L1, L2):
-            return Pgw(L1, L2) * len(L1)
+            return Pgw(L1, L2).T * len(L1)
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng(seed)
