@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import functional as F
 import numpy as np
-import pandas as pd
 
 def sink_vect_exp(K, numItermax=10, stopThr=1e-9, cuda = False):
 

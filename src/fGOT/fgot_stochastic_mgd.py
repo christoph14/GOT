@@ -1,20 +1,10 @@
 
-from sink_otm import *
-
-from bregman import *
+from fGOT.sink_otm import *
 
 import numpy as np
 import torch
 torch.set_default_tensor_type('torch.DoubleTensor')
-import random
-import math
 import numpy.linalg as lg
-import scipy.linalg as slg
-from matplotlib import pyplot as plt
-from   numpy import linalg as LA
-
-import networkx as nx
-import time
 
 
 def loss(DS, g1, g2, loss_type, epsilon = 5e-4):

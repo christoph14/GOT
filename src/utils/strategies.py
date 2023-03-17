@@ -6,6 +6,7 @@ import scipy.linalg as slg
 import torch
 
 from alignment import got_strategy, gw_strategy
+from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, Pgw
 from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
 from utils.help_functions import graph_from_laplacian
@@ -20,10 +21,10 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
-    elif strategy_name.lower() == 'got-original-l':
+    elif strategy_name.lower() == 'got-original':
         def strategy(L1, L2):
             _, _, permutation = find_permutation(
-                L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', alpha=alpha, ones=ones, graphs=False
+                L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', alpha=alpha, ones=ones, graphs=True
             )
             return permutation
     elif strategy_name.lower() == 'l2':
@@ -35,7 +36,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
     elif strategy_name.lower() == 'fgot':
-        def strategy(L1, L2, epsilon=0.015, method='got'):
+        def strategy(L1, L2, epsilon=0.006, method='got'):
             # To avoid "Warning: numerical errors at iteration 0" increase epsilon
             max_iter = epochs
             tol = 1e-9
@@ -93,6 +94,21 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             X = pygm.ipfp(K, n1, n2) * n1
             X = pygm.hungarian(X)
             return X.T
+    elif strategy_name.lower() == 'plsq':
+        def strategy(L1, L2):
+            return PLsq(L1, L2) * len(L1)
+    elif strategy_name.lower() == 'pgot':
+        def strategy(L1, L2):
+            return Pgot(L1, L2) * len(L1)
+    elif strategy_name.lower() == 'pstoh':
+        def strategy(L1, L2):
+            return PstoH(L1, L2) * len(L1)
+    elif strategy_name.lower() == 'p_nv2':
+        def strategy(L1, L2):
+            return P_nv2(L1, L2) * len(L1)
+    elif strategy_name.lower() == 'pgw':
+        def strategy(L1, L2):
+            return Pgw(L1, L2) * len(L1)
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng(seed)
