@@ -97,7 +97,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
     elif strategy_name.lower() == 'plsq':
         def strategy(L1, L2):
             return PLsq(L1, L2).T * len(L1)
-    elif strategy_name.lower().T == 'pgot':
+    elif strategy_name.lower() == 'pgot':
         def strategy(L1, L2):
             return Pgot(L1, L2).T * len(L1)
     elif strategy_name.lower() == 'pstoh':
