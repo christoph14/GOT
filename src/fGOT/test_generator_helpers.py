@@ -40,7 +40,7 @@ def ba_generator(n, m):
             return ba
         
         
-def er_generator(n):
+def er_generator(n, seed=None):
     """
     Generates connected ER graph with p=2*log(n)/n
     """
@@ -48,7 +48,7 @@ def er_generator(n):
     p = 2*np.log(n) / n #2
     
     while True:
-        er = nx.generators.erdos_renyi_graph(n, p)
+        er = nx.generators.erdos_renyi_graph(n, p, seed)
         if nx.is_connected(er):
             return er
         
