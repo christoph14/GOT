@@ -7,10 +7,8 @@ import numpy as np
 
 from fGOT.test_generator_helpers import er_generator, permutation_generator
 from utils import check_soft_assignment, check_permutation_matrix
-from utils.distances import gw_distance
 from utils.strategies import get_strategy
-from utils.help_functions import remove_edges, graph_from_laplacian
-from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss
+from utils.loss_functions import w2_loss, l2_loss
 
 
 # ArgumentParser
@@ -49,40 +47,16 @@ if not args.ignore_log:
     print('Seed:', args.seed)
     print('Path:', args.path)
 
-# Set parameters for block stochastic model
-n = args.graph_size
-p = args.within_probability
-q = args.between_probability
-n_blocks = 4
-block_size = int(n/n_blocks)
-blocks = [block_size] * n_blocks
-probs = [[p, q, q, q],
-         [q, p, q, q],
-         [q, q, p, q],
-         [q, q, q, p]]
-
 # Create dictionaries
 w2_errors = {}
 l2_errors = {}
-l2_inv_errors = {}
-gw_errors ={}
 for name in strategy_names:
     w2_errors[name] = []
     l2_errors[name] = []
-    l2_inv_errors[name] = []
-    gw_errors[name] = []
 data = []
 
 # Create random generator
 rng = np.random.default_rng(seed=args.seed)
-
-# Generate original graph
-# G1 = nx.stochastic_block_model(blocks, probs, seed=rng)
-# L1 = nx.laplacian_matrix(G1, range(n)).todense()
-# assert nx.is_connected(G1), 'G1 is not connected.'
-# communities = {}
-# for node in G1.nodes:
-#     communities[node] = np.floor(node / block_size)
 
 p_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 for p in p_values:
@@ -101,22 +75,16 @@ for p in p_values:
             P_estimated = check_permutation_matrix(P_estimated, atol=1e-02)
 
         # Calculate and save different loss functions
-        # G_aligned = graph_from_laplacian(P_estimated.T @ L2 @ P_estimated)
         w2_error = w2_loss(L1, L2, P_estimated)
         l2_error = l2_loss(L1, L2, P_estimated)
-        # l2_inv_error = l2_inv_loss(L1, L2, P_estimated, args.alpha, ones=True)
-        # gw_error = gw_distance(G1, G_aligned)
         w2_errors[name].append(w2_error)
         l2_errors[name].append(l2_error)
-        # l2_inv_errors[name].append(l2_inv_error)
-        # gw_errors[name].append(gw_error)
         data.append(
             {'strategy' : name,
              'seed' : args.seed,
              'p' : p,
              'w2_loss' : w2_error,
              'l2_loss' : l2_error,
-             # 'gw_loss' : gw_error
             }
         )
     if not args.ignore_log:
@@ -142,10 +110,3 @@ except sqlite3.OperationalError:
 cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss)"
                 " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss", data)
 con.commit()
-
-# os.makedirs(args.path, exist_ok=True)
-# for name in strategy_names:
-#     np.savetxt(f'{args.path}/l2_inv_error_{name}#{args.seed}.csv', l2_inv_errors[name])
-#     np.savetxt(f'{args.path}/w2_error_{name}#{args.seed}.csv', w2_errors[name])
-#     np.savetxt(f'{args.path}/l2_error_{name}#{args.seed}.csv', l2_errors[name])
-#     np.savetxt(f'{args.path}/gw_error_{name}#{args.seed}.csv', gw_errors[name])
