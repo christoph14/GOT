@@ -110,3 +110,5 @@ except sqlite3.OperationalError:
 cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss)"
                 " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss", data)
 con.commit()
+cur.close()
+con.close()
