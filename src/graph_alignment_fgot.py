@@ -62,7 +62,7 @@ p_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 for p in p_values:
     n = int(args.graph_size * p)
     L2 = nx.laplacian_matrix(er_generator(n, rng)).todense()
-    P_true = permutation_generator(n)
+    P_true = permutation_generator(n, seed=args.seed)
     L1 = P_true @ nx.laplacian_matrix((er_generator(n, rng))).todense() @ P_true.T
 
     # Calculate permutation and different losses for every strategy
