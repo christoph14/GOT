@@ -25,8 +25,8 @@ def loss(DS, g1, g2, loss_type, epsilon = 5e-4):
 # Algorithm -- Stochastic Mirror gradient 
 #===================================================================
 
-def fgot_stochastic(g1, g2, tau=1, n_samples=10, epochs=1000, lr=.5, 
-            std_init = 10, loss_type = 'w_simple', seed=42, verbose=True, tol = 1e-12, adapt_lr = False):   
+def fgot_stochastic(g1, g2, it=10, tau=1, n_samples=10, epochs=1000, lr=.5, std_init = 10, loss_type = 'w_simple',
+                    seed=42, verbose=True, tol = 1e-12, adapt_lr = False):
 
     # Initialization
     torch.manual_seed(seed)
@@ -49,7 +49,7 @@ def fgot_stochastic(g1, g2, tau=1, n_samples=10, epochs=1000, lr=.5,
     history = []
     epoch = 0
     err = 1
-    while (err > tol and epoch < epochs): 
+    while err > tol and epoch < epochs:
         cost = 0
         for sample in range(n_samples):
             eps = torch.rand(n, m) 
@@ -73,12 +73,11 @@ def fgot_stochastic(g1, g2, tau=1, n_samples=10, epochs=1000, lr=.5,
         
         # Tracking
         #history.append(cost.item())
-        if ((epoch+1) % 10 == 0 and (epoch>50)):
-
+        if (epoch+1) % 10 == 0 and epoch > 50:
             err = np.linalg.norm(sink(-tau*mean.detach(), tau) - sink(-tau*mean_prev.detach(), tau)) / (n*m)
         epoch = epoch + 1
     
-    P = sink(-tau*mean, tau)
+    P = sink(-tau*mean, tau, numItermax=it)
     
     P = P.squeeze()
     P = P.detach().numpy()
