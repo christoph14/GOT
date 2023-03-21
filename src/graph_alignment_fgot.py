@@ -66,7 +66,7 @@ for p in p_values:
             P_estimated = check_permutation_matrix(P_estimated, atol=1e-02)
 
         # Calculate and save different loss functions
-        w2_error = w2_loss(L1, L2, P_estimated)
+        w2_error = w2_loss(L1, L2, P_estimated, alpha=args.alpha)
         l2_error = l2_loss(L1, L2, P_estimated)
         data.append(
             {'strategy' : name,
