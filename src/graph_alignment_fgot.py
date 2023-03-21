@@ -31,7 +31,6 @@ parser.add_argument('--path', type=str, default='../results/', help='the path to
 parser.add_argument('--ignore_log', action='store_const', const=True, default=False, help='disables the log')
 parser.add_argument('--allow_soft_assignment', action='store_const', const=True,
                     default=False, help='allow soft assignment instead of a permutation matrix')
-parser.add_argument('--reset_results', action='store_const', const=True, default=False, help='delete old results')
 args = parser.parse_args()
 
 # Get strategies
@@ -84,8 +83,6 @@ for p in p_values:
 os.makedirs(args.path, exist_ok=True)
 con = sqlite3.connect(f'{args.path}/fgot_results.db', timeout=100)
 cur = con.cursor()
-if args.reset_results:
-    cur.execute('''DROP TABLE alignment''')
 try:
     cur.execute('''CREATE TABLE alignment (
                        STRATEGY TEXT NOT NULL,
