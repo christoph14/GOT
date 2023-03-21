@@ -81,7 +81,7 @@ for p in p_values:
 
 # Save results in database
 os.makedirs(args.path, exist_ok=True)
-con = sqlite3.connect(f'{args.path}/fgot_results.db', timeout=100)
+con = sqlite3.connect(f'{args.path}/results_fgot.db')
 cur = con.cursor()
 try:
     cur.execute('''CREATE TABLE alignment (
