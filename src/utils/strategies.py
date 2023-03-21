@@ -102,10 +102,10 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return Pgot(L1, L2).T * len(L1)
     elif strategy_name.lower() == 'pstoh':
         def strategy(L1, L2):
-            return PstoH(L1, L2) * len(L1)
+            return PstoH(L1, L2, it=it, tau=tau) * len(L1)
     elif strategy_name.lower() == 'p_nv2':
         def strategy(L1, L2):
-            return P_nv2(L1, L2) * len(L1)
+            return P_nv2(L1, L2, it=it, tau=tau) * len(L1)
     elif strategy_name.lower() == 'pgw':
         def strategy(L1, L2):
             return Pgw(L1, L2).T * len(L1)
