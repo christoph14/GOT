@@ -23,7 +23,7 @@ def PstoH(L1, L2, it=10, tau=1):
 def P_nv2(L1, L2, it=10, tau=1):
     """$g(L) = L^2$ stochastic"""
     return fgot_stochastic_mgd.fgot_stochastic(get_filters(L2, 'sq'), get_filters(L1, 'sq'), it=it, tau=tau,
-                                               n_samples=5, epochs=5000, lr=50*len(L1)*len(L2), std_init=5,
+                                               n_samples=5, epochs=1000, lr=50*len(L1)*len(L2), std_init=5,
                                                loss_type='w_simple', tol=1e-12, adapt_lr=True)
 
 def Pgw(L1, L2):
