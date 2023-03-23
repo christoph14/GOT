@@ -6,13 +6,13 @@ import scipy.linalg as slg
 from fGOT import fgot_mgd, fgot_stochastic_mgd
 
 
-def PLsq(L1, L2):
+def PLsq(L1, L2, epsilon=0.003, epochs=1000):
     """$g(L) = L^2$"""
-    return find_trace_sink_wass_filters_reg(L1, L2, 0.003, 'sq')
+    return find_trace_sink_wass_filters_reg(L1, L2, epsilon, 'sq', max_iter=epochs)
 
-def Pgot(L1, L2):
+def Pgot(L1, L2, epsilon=0.006, epochs=1000):
     """$g(L) = L^{\dagger/2}$"""
-    return find_trace_sink_wass_filters_reg(L1, L2, 0.006, 'got')
+    return find_trace_sink_wass_filters_reg(L1, L2, epsilon, 'got', max_iter=epochs)
 
 def PstoH(L1, L2, it=10, tau=1):
     """$g(L) = L^{\dagger/2}$ stochastic"""
@@ -30,16 +30,15 @@ def Pgw(L1, L2):
     """"""
     return find_gw_distances(create_distance_matrix(L1), create_distance_matrix(L2), 2e-2)
 
-def find_trace_sink_wass_filters_reg(L1, L2, epsilon = 7e-4, method = 'got', tau = 0.2):
+def find_trace_sink_wass_filters_reg(L1, L2, epsilon=7e-4, method='got', tau=0.2, max_iter=1000):
     n = len(L1)
     m = len(L2)
     p = np.repeat(1/n, n)
     q = np.repeat(1/m, m)
-    max_iter = 500
     g1= get_filters(L1, method, tau)
     g2= get_filters(L2, method, tau)
 
-    gw, log = fgot_mgd.fgot(g1, g2, p, q, epsilon*np.max(g1)*np.max(g2)/n, max_iter=max_iter, tol=1e-9, verbose=False, log=True, lapl = True)
+    gw = fgot_mgd.fgot(g1, g2, p, q, epsilon*np.max(g1)*np.max(g2)/n, max_iter=max_iter, tol=1e-9, lapl=True)
 
     return gw
 

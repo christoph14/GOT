@@ -15,7 +15,8 @@ torch.set_default_tensor_type('torch.DoubleTensor')
 pygm.BACKEND = 'numpy'
 
 
-def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.1, ones=True):
+def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.1, ones=True,
+                 epsilon=0.006):
     """Return a strategy computing a transport plan from L1 to L2."""
     if strategy_name.lower() == 'got':
         def strategy(L1, L2):
@@ -36,7 +37,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
     elif strategy_name.lower() == 'fgot':
-        def strategy(L1, L2, epsilon=0.006, method='got'):
+        def strategy(L1, L2, epsilon=0.03, method='got'):
             # To avoid "Warning: numerical errors at iteration 0" increase epsilon
             max_iter = epochs
             tol = 1e-9
@@ -96,10 +97,10 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return X.T
     elif strategy_name.lower() == 'plsq':
         def strategy(L1, L2):
-            return PLsq(L1, L2).T * len(L1)
+            return PLsq(L1, L2, epsilon=epsilon, epochs=epochs).T * len(L1)
     elif strategy_name.lower() == 'pgot':
         def strategy(L1, L2):
-            return Pgot(L1, L2).T * len(L1)
+            return Pgot(L1, L2, epsilon=epsilon, epochs=epochs).T * len(L1)
     elif strategy_name.lower() == 'pstoh':
         def strategy(L1, L2):
             return PstoH(L1, L2, it=it, tau=tau) * len(L1)
