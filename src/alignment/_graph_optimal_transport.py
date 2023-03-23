@@ -6,6 +6,39 @@ import numpy.linalg as lg
 
 
 def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42, verbose=True, alpha=0.0, ones=True):
+    """GOT strategy for graph alignment.
+
+    Parameters
+    ----------
+    L1 : array-like of shape (n_nodes, n_nodes)
+        Laplacian matrix of the first graph.
+    L2 : array-like of shape (n_nodes, n_nodes)
+        Laplacian matrix of the second graph.
+    it : int
+        Number of Sinkhorn iterations.
+    tau : float
+        Sinkhorn parameter.
+    n_samples : int
+        Number of samples per iteration used by the algorithm.
+    epochs : int
+        Number of epochs used by the algorithm.
+    lr : float
+        Learning rate.
+    loss_type : str, default='w'
+        The loss function to be optimized. Must be in ['w', 'l2'].
+    seed : int
+        Random seed.
+    verbose : bool, default=True
+    alpha : float, default=0.0
+        Regularization of the Laplacian matrices.
+    ones : bool, default=True
+        If true, add ones to the matrices before inverting. Does not change the result of GOT error.
+
+    Returns
+    -------
+    P : np.ndarray of shape (n_nodes, n_nodes)
+        The computed permutation matrix.
+    """
     L1_inv, L2_inv = regularise_and_invert(L1, L2, alpha, ones)
 
     # Initialization
