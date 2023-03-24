@@ -1,24 +1,11 @@
-#!/home/we661512/miniconda3/envs/graph/bin/python
-#SBATCH --job-name=fgot_distances
-#SBATCH --output=../log_slurm/fgot_classification_%A.log
-#SBATCH --mem-per-cpu=3G
-#SBATCH --time 360
-#SBATCH --account=thes1398
-#SBATCH --ntasks=1
-
-
 import argparse
 import os
 import pickle
-import sys
-
-sys.path.append(os.getcwd())
 
 import networkx as nx
 import numpy as np
 
 from utils.strategies import get_strategy
-
 
 
 if __name__ == '__main__':
