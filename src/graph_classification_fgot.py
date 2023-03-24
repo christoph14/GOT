@@ -54,7 +54,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(graphs, y, test_size=n_graphs, random_state=random_state)
 
     # Compute and save distances
-    result = map(lambda G : compute_distance((X_train[args.graph_number], G)), X_test)
+    result = map(lambda G : compute_distance((X_test[args.graph_number], G)), X_train)
     distances = list(result)
     os.makedirs(args.path, exist_ok=True)
     np.savetxt(f'{args.path}row{args.graph_number}#{random_state}.csv', distances)
