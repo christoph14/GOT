@@ -1,6 +1,7 @@
 import argparse
 import os
 import pickle
+from time import time
 
 import networkx as nx
 import numpy as np
@@ -16,6 +17,9 @@ if __name__ == '__main__':
     parser.add_argument('seed', type=int, help='the used random seed')
     parser.add_argument('--path', type=str, default='../results/fgot_distances', help='the path to store the output files')
     args = parser.parse_args()
+
+    # Log computation time
+    t = time()
 
     # Load graph data set
     n_graphs = 100
@@ -35,7 +39,10 @@ if __name__ == '__main__':
     P = strategy(L1, L2)
     distance = np.linalg.norm(L1 - P.T @ L2 @ P, ord='fro')
     os.makedirs(args.path, exist_ok=True)
-    np.savetxt(f'{args.path}/{args.graph1}-{args.graph2}#{args.seed}.csv', distance)
+    np.savetxt(f'{args.path}/{args.graph1}-{args.graph2}#{args.seed}.csv', [distance])
+
+    print(f'Distance: {distance}')
+    print(f'Time: {time() - t}')
 
     # # Compute and save accuracy
     # nearest_neighbors = np.argmin(distances, axis=0)
