@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=fgot_distances
-#SBATCH --output=../log_slurm/fgot_classification_%A.log
+#SBATCH --output=../log_slurm/fgot_classification_%A_%a.log
 #SBATCH --array=0-99
 #SBATCH --time=02:00:00
 #SBATCH --partition=c18m
