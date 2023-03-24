@@ -4,7 +4,7 @@
 #SBATCH --mem-per-cpu=3G
 #SBATCH --time 360
 #SBATCH --account=thes1398
-#SBATCH --ntasks=200
+#SBATCH --ntasks=1
 
 
 import argparse
@@ -39,8 +39,9 @@ def compute_distance(args):
 if __name__ == '__main__':
     # Parse arguments
     parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
+    parser.add_argument('graph_number', type=int, help='the graph for which the distances are computed')
     parser.add_argument('seed', type=int, help='the used random seed')
-    parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
+    parser.add_argument('--path', type=str, default='../results/fgot_distances/', help='the path to store the output files')
     args = parser.parse_args()
     random_state = args.seed
 
@@ -52,38 +53,35 @@ if __name__ == '__main__':
     y = np.array([G.graph['label'] for G in graphs])
     X_train, X_test, y_train, y_test = train_test_split(graphs, y, test_size=n_graphs, random_state=random_state)
 
-    # Create arguments
-    arguments = list(itertools.product(X_train, X_test))
-
     # Compute and save distances
-    with multiprocessing.Pool(200) as pool:
-        result = pool.map(compute_distance, arguments)
-    distances = np.reshape(result, (len(X_train), len(X_test)))
-    np.savetxt(f'../results/distances_{random_state}.csv', distances)
-
-    # Compute and save accuracy
-    nearest_neighbors = np.argmin(distances, axis=0)
-    y_pred = y_train[nearest_neighbors]
-    accuracy = n_graphs - zero_one_loss(y_test, y_pred, normalize=False)
-
-    # Save results in database
+    result = map(lambda G : compute_distance((X_train[args.graph_number], G)), X_test)
+    distances = list(result)
     os.makedirs(args.path, exist_ok=True)
-    con = sqlite3.connect(f'{args.path}/results_fgot.db', timeout=60)
-    cur = con.cursor()
-    try:
-        cur.execute('''CREATE TABLE classification (
-                           STRATEGY TEXT NOT NULL,
-                           DATA TEXT NOT NULL,
-                           SEED TEXT NOT NULL,
-                           ACCURACY REAL,
-                           unique (STRATEGY, DATA, SEED)
-                       )''')
-    except sqlite3.OperationalError:
-        pass
+    np.savetxt(f'{args.path}row{args.graph_number}#{random_state}.csv', distances)
 
-    data = ('Pgot', 'ENZYMES', args.seed, int(accuracy))
-    cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?) "
-                "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy;", data)
-    con.commit()
-    cur.close()
-    con.close()
+    # # Compute and save accuracy
+    # nearest_neighbors = np.argmin(distances, axis=0)
+    # y_pred = y_train[nearest_neighbors]
+    # accuracy = n_graphs - zero_one_loss(y_test, y_pred, normalize=False)
+    #
+    # # Save results in database
+    # os.makedirs(args.path, exist_ok=True)
+    # con = sqlite3.connect(f'{args.path}/results_fgot.db', timeout=60)
+    # cur = con.cursor()
+    # try:
+    #     cur.execute('''CREATE TABLE classification (
+    #                        STRATEGY TEXT NOT NULL,
+    #                        DATA TEXT NOT NULL,
+    #                        SEED TEXT NOT NULL,
+    #                        ACCURACY REAL,
+    #                        unique (STRATEGY, DATA, SEED)
+    #                    )''')
+    # except sqlite3.OperationalError:
+    #     pass
+    #
+    # data = ('Pgot', 'ENZYMES', args.seed, int(accuracy))
+    # cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?) "
+    #             "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy;", data)
+    # con.commit()
+    # cur.close()
+    # con.close()
