@@ -8,56 +8,47 @@
 
 
 import argparse
-import itertools
-import multiprocessing
 import os
 import pickle
-import sqlite3
 import sys
-
-from sklearn.metrics import zero_one_loss
 
 sys.path.append(os.getcwd())
 
 import networkx as nx
 import numpy as np
-from sklearn.model_selection import train_test_split
 
 from utils.strategies import get_strategy
 
 
 
-def compute_distance(args):
-    G1, G2 = args
-    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=1000, lr=0.2)
-    L1 = nx.laplacian_matrix(G1).todense()
-    L2 = nx.laplacian_matrix(G2).todense()
-    P = strategy(L1, L2)
-    distance = np.linalg.norm(L1 - P.T @ L2 @ P, ord='fro')
-    return distance
-
 if __name__ == '__main__':
     # Parse arguments
     parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
-    parser.add_argument('graph_number', type=int, help='the graph for which the distances are computed')
+    parser.add_argument('graph1', type=int, help='the first graph for which the distances are computed')
+    parser.add_argument('graph2', type=int, help='the second graph for which the distances are computed')
     parser.add_argument('seed', type=int, help='the used random seed')
-    parser.add_argument('--path', type=str, default='../results/fgot_distances/', help='the path to store the output files')
+    parser.add_argument('--path', type=str, default='../results/fgot_distances', help='the path to store the output files')
     args = parser.parse_args()
-    random_state = args.seed
 
     # Load graph data set
     n_graphs = 100
     path = "../data/ENZYMES/enzymes.pkl"
     with open(path, 'rb') as file:
         graphs = pickle.load(file)
-    y = np.array([G.graph['label'] for G in graphs])
-    X_train, X_test, y_train, y_test = train_test_split(graphs, y, test_size=n_graphs, random_state=random_state)
+    rng = np.random.default_rng(seed=args.seed)
+    X = np.random.choice(graphs, n_graphs)
+    y = np.array([G.graph['label'] for G in X])
 
     # Compute and save distances
-    result = map(lambda G : compute_distance((X_test[args.graph_number], G)), X_train)
-    distances = list(result)
+    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=1, lr=0.2)
+    G1 = X[args.graph1]
+    G2 = X[args.graph2]
+    L1 = nx.laplacian_matrix(G1).todense()
+    L2 = nx.laplacian_matrix(G2).todense()
+    P = strategy(L1, L2)
+    distance = np.linalg.norm(L1 - P.T @ L2 @ P, ord='fro')
     os.makedirs(args.path, exist_ok=True)
-    np.savetxt(f'{args.path}row{args.graph_number}#{random_state}.csv', distances)
+    np.savetxt(f'{args.path}/{args.graph1}-{args.graph2}#{args.seed}.csv', distance)
 
     # # Compute and save accuracy
     # nearest_neighbors = np.argmin(distances, axis=0)
