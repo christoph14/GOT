@@ -40,7 +40,7 @@ if __name__ == '__main__':
     y = np.array([G.graph['label'] for G in X])
 
     # Compute and save distances
-    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=1, lr=0.2)
+    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=1000, lr=0.2)
     G1 = X[args.graph1]
     G2 = X[args.graph2]
     L1 = nx.laplacian_matrix(G1).todense()
