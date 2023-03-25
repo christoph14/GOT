@@ -30,8 +30,6 @@ if __name__ == '__main__':
     parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
     parser.add_argument('--n_graphs', type=int, default=100, help='the number of sampled graphs')
     args = parser.parse_args()
-    t1 = time()
-    print(f'Args parsed in {t1 - t0:.3f}s')
 
     rng = np.random.default_rng(args.seed)
 
@@ -42,7 +40,6 @@ if __name__ == '__main__':
     X = rng.choice(graphs, args.n_graphs)
     y = np.array([G.graph['label'] for G in X])
     t2 = time()
-    print(f'Loaded graphs in {t2 - t1:.3f}s')
 
     # Create arguments
     arguments = list(itertools.product(X, X))
