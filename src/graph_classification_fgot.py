@@ -14,7 +14,7 @@ from utils.strategies import get_strategy
 
 
 def compute_distance(G1, G2):
-    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=10, lr=0.2)
+    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=1000, lr=0.2)
     L1 = nx.laplacian_matrix(G1).todense()
     L2 = nx.laplacian_matrix(G2).todense()
     P = strategy(L1, L2)
@@ -22,9 +22,8 @@ def compute_distance(G1, G2):
     return distance
 
 if __name__ == '__main__':
-    # Parse arguments
-    print('Start job')
     t0 = time()
+    # Parse arguments
     parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
     parser.add_argument('seed', type=int, help='the used random seed')
     parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
@@ -39,14 +38,18 @@ if __name__ == '__main__':
         graphs = pickle.load(file)
     X = rng.choice(graphs, args.n_graphs)
     y = np.array([G.graph['label'] for G in X])
-    t2 = time()
+    print(f'Compute distance matrix for {args.n_graphs} graphs')
 
-    # Create arguments
-    arguments = list(itertools.product(X, X))
+    # Determine number of cores
+    if 'SLURM_CPUS_PER_TASK' in os.environ:
+        number_of_cores = int(os.environ['SLURM_CPUS_PER_TASK'])
+    else:
+        number_of_cores = multiprocessing.cpu_count()
+    print(f'Use {number_of_cores} cores')
 
     # Compute and save distances
-    with multiprocessing.Pool(6) as pool:
-        result = pool.starmap(compute_distance, arguments)
+    with multiprocessing.Pool(number_of_cores) as pool:
+        result = pool.starmap(compute_distance, itertools.product(X, X))
     distances = np.reshape(result, (len(X), len(X)))
     np.savetxt(f'../results/distances_{args.seed}.csv', distances)
 
@@ -54,7 +57,7 @@ if __name__ == '__main__':
     nearest_neighbors = np.argmin(distances, axis=0)
     y_pred = y[nearest_neighbors]
     accuracy = args.n_graphs - zero_one_loss(y, y_pred, normalize=False)
-    print(f'Accuracy: {accuracy}')
+    print(f'Accuracy: {accuracy}/{args.n_graphs}')
 
     # Save results in database
     os.makedirs(args.path, exist_ok=True)
@@ -77,4 +80,4 @@ if __name__ == '__main__':
     con.commit()
     cur.close()
     con.close()
-    print(f'Completed task in {time() - t0:.3f}s.')
+    print(f'Completed task in {time() - t0:.0f}s')
