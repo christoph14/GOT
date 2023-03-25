@@ -56,7 +56,8 @@ if __name__ == '__main__':
     # Compute and save accuracy
     nearest_neighbors = np.argmin(distances, axis=0)
     y_pred = y[nearest_neighbors]
-    accuracy = n_graphs - zero_one_loss(y, y_pred, normalize=False)
+    accuracy = args.n_graphs - zero_one_loss(y, y_pred, normalize=False)
+    print(f'Accuracy: {accuracy}')
 
     # Save results in database
     os.makedirs(args.path, exist_ok=True)
