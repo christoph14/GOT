@@ -4,6 +4,7 @@ import multiprocessing
 import os
 import pickle
 import sqlite3
+from time import time
 
 from sklearn.metrics import zero_one_loss
 import networkx as nx
@@ -12,40 +13,43 @@ import numpy as np
 from utils.strategies import get_strategy
 
 
-
-def compute_distance(args):
-    G1, G2 = args
+def compute_distance(G1, G2):
     strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=10, lr=0.2)
     L1 = nx.laplacian_matrix(G1).todense()
     L2 = nx.laplacian_matrix(G2).todense()
     P = strategy(L1, L2)
     distance = np.linalg.norm(L1 - P.T @ L2 @ P, ord='fro')
-    print('done')
     return distance
 
 if __name__ == '__main__':
     # Parse arguments
+    print('Start job')
+    t0 = time()
     parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
     parser.add_argument('seed', type=int, help='the used random seed')
     parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
+    parser.add_argument('--n_graphs', type=int, default=100, help='the number of sampled graphs')
     args = parser.parse_args()
+    t1 = time()
+    print(f'Args parsed in {t1 - t0:.3f}s')
 
     rng = np.random.default_rng(args.seed)
 
     # Load graph data set
-    n_graphs = 100
     path = "../data/ENZYMES/enzymes.pkl"
     with open(path, 'rb') as file:
         graphs = pickle.load(file)
-    X = rng.choice(graphs, n_graphs)
+    X = rng.choice(graphs, args.n_graphs)
     y = np.array([G.graph['label'] for G in X])
+    t2 = time()
+    print(f'Loaded graphs in {t2 - t1:.3f}s')
 
     # Create arguments
     arguments = list(itertools.product(X, X))
 
     # Compute and save distances
     with multiprocessing.Pool(6) as pool:
-        result = pool.map(compute_distance, arguments)
+        result = pool.starmap(compute_distance, arguments)
     distances = np.reshape(result, (len(X), len(X)))
     np.savetxt(f'../results/distances_{args.seed}.csv', distances)
 
@@ -75,3 +79,4 @@ if __name__ == '__main__':
     con.commit()
     cur.close()
     con.close()
+    print(f'Completed task in {time() - t0:.3f}s.')
