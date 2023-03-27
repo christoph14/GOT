@@ -90,25 +90,25 @@ for _ in range(graphs_per_class):
 
 strategy = get_strategy(args.strategy, it=10, tau=5, n_samples=30, epochs=1500,
                         lr=0.2, alpha=0.1, ones=True, verbose=False)
-alignment_matrices = []
-for idx, (L, L_permuted) in enumerate(zip(graphs, permuted_graphs)):
-    alignment_matrices.append(strategy(L, L_permuted))
-    sys.stdout.write(f'\r{idx+1} graphs done.')
-
-aligned_graphs = [P.T @ L @ P for L, P in zip(permuted_graphs, alignment_matrices)]
-
-if args.strategy.lower() in ['got', 'fgot']:
-    distances = [[wasserstein_distance(L, L_aligned) for L in graphs] for L_aligned in aligned_graphs]
-elif args.strategy.lower() in ['gw']:
-    distances = [[gw_distance(graph_from_laplacian(L), graph_from_laplacian(L_aligned)) for L in graphs] for L_aligned in aligned_graphs]
-else:
-    distances = [[np.linalg.norm(L - L_aligned, ord='fro') for L in graphs] for L_aligned in aligned_graphs]
+distances = np.full((100, 100), np.inf)
+for i, L1 in enumerate(permuted_graphs):
+    for j, L2 in enumerate(permuted_graphs):
+        if i == j: continue
+        P = strategy(L1, L2)
+        L_aligned = P.T @ L2 @ P
+        if args.strategy.lower() in ['got', 'fgot']:
+            distances[i, j] = wasserstein_distance(L1, L_aligned)
+        elif args.strategy.lower() in ['gw']:
+            distances[i,j] = gw_distance(graph_from_laplacian(L1), graph_from_laplacian(L_aligned))
+        else:
+            distances[i,j] = np.linalg.norm(L1 - L_aligned, ord='fro')
+    sys.stdout.write(f'\r{i + 1} graphs done')
 
 y = np.array(y)
-knn = KNeighborsClassifier(n_neighbors=1, metric='precomputed').fit(distances, y)
-indices = knn.kneighbors(distances, return_distance=False)
-indices = indices[:, 0]
-y_pred = y[indices]
+nearest_neighbors = np.nanargmin(distances, axis=0)
+y_pred = y[nearest_neighbors]
+accuracy = len(y) - zero_one_loss(y, y_pred, normalize=False)
+
 print()
 print(confusion_matrix(y, y_pred))
 print('Correct classifications:', np.trace(confusion_matrix(y, y_pred)))
