@@ -78,7 +78,7 @@ if __name__ == '__main__':
     except sqlite3.OperationalError:
         pass
 
-    data = ('Pgot', 'ENZYMES', args.seed, int(accuracy))
+    data = ('Pgot', args.dataset, args.seed, int(accuracy))
     cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?) "
                 "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy;", data)
     con.commit()
