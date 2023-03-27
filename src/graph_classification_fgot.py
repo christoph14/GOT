@@ -38,6 +38,7 @@ if __name__ == '__main__':
     graphs = tud_to_networkx(args.dataset)
     X = rng.choice(graphs, args.n_graphs)
     y = np.array([G.graph['classes'] for G in X])
+    print(f"Dataset: {args.dataset}")
     print(f'Compute distance matrix for {args.n_graphs} graphs')
 
     # Determine number of cores
@@ -51,10 +52,13 @@ if __name__ == '__main__':
     with multiprocessing.Pool(number_of_cores) as pool:
         result = pool.starmap(compute_distance, itertools.product(X, X))
     distances = np.reshape(result, (len(X), len(X)))
-    np.savetxt(f'../results/distances_{args.seed}.csv', distances)
+    number_errors = np.count_nonzero(np.isnan(distances))
+    if number_errors > 0:
+        print(f'Warning: {number_errors} NaNs in distance matrix')
+    np.fill_diagonal(distances, np.nan)
 
     # Compute and save accuracy
-    nearest_neighbors = np.argmin(distances, axis=0)
+    nearest_neighbors = np.nanargmin(distances, axis=0)
     y_pred = y[nearest_neighbors]
     accuracy = args.n_graphs - zero_one_loss(y, y_pred, normalize=False)
     print(f'Accuracy: {accuracy}/{args.n_graphs}')
