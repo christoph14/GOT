@@ -10,6 +10,7 @@ from sklearn.metrics import zero_one_loss
 import networkx as nx
 import numpy as np
 
+from utils.dataset import tud_to_networkx
 from utils.strategies import get_strategy
 
 
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     # Parse arguments
     parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
     parser.add_argument('seed', type=int, help='the used random seed')
+    parser.add_argument('dataset', type=str, help='the benchmark data set')
     parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
     parser.add_argument('--n_graphs', type=int, default=100, help='the number of sampled graphs')
     args = parser.parse_args()
@@ -33,11 +35,9 @@ if __name__ == '__main__':
     rng = np.random.default_rng(args.seed)
 
     # Load graph data set
-    path = "../data/ENZYMES/enzymes.pkl"
-    with open(path, 'rb') as file:
-        graphs = pickle.load(file)
+    graphs = tud_to_networkx(args.dataset)
     X = rng.choice(graphs, args.n_graphs)
-    y = np.array([G.graph['label'] for G in X])
+    y = np.array([G.graph['classes'] for G in X])
     print(f'Compute distance matrix for {args.n_graphs} graphs')
 
     # Determine number of cores
