@@ -1,8 +1,8 @@
 import argparse
+import functools
 import itertools
 import multiprocessing
 import os
-import pickle
 import sqlite3
 from time import time
 
@@ -14,8 +14,8 @@ from utils.dataset import tud_to_networkx
 from utils.strategies import get_strategy
 
 
-def compute_distance(G1, G2):
-    strategy = get_strategy('fgot', it=10, tau=1, n_samples=30, epochs=1000, lr=0.2)
+def compute_distance(G1, G2, strategy, strategy_args):
+    strategy = get_strategy(strategy, it=10, tau=1, n_samples=30, lr=0.2, **strategy_args)
     L1 = nx.laplacian_matrix(G1).todense()
     L2 = nx.laplacian_matrix(G2).todense()
     P = strategy(L1, L2)
@@ -27,9 +27,15 @@ if __name__ == '__main__':
     # Parse arguments
     parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
     parser.add_argument('seed', type=int, help='the used random seed')
+    parser.add_argument('algorithm', type=str, help='the alignment algorithm')
     parser.add_argument('dataset', type=str, help='the benchmark data set')
     parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
     parser.add_argument('--n_graphs', type=int, default=100, help='the number of sampled graphs')
+    # fGOT arguments
+    parser.add_argument('--filter', type=str, default=None)
+    parser.add_argument('--epsilon', type=float, default=0.006)
+    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--scale', action='store_const', const=True, default=False, help='scale soft assignment')
     args = parser.parse_args()
 
     rng = np.random.default_rng(args.seed)
@@ -49,8 +55,15 @@ if __name__ == '__main__':
     print(f'Use {number_of_cores} cores')
 
     # Compute and save distances
+    strategy_args = {
+        'filter_name': args.filter,
+        'epsilon': args.epsilon,
+        'epochs': args.epochs,
+        'scale': args.scale,
+    }
+    f = functools.partial(compute_distance, strategy=args.algorithm, strategy_args=strategy_args)
     with multiprocessing.Pool(number_of_cores) as pool:
-        result = pool.starmap(compute_distance, itertools.product(X, X))
+        result = pool.starmap(f, itertools.product(X, X))
     distances = np.reshape(result, (len(X), len(X)))
     number_errors = np.count_nonzero(np.isnan(distances))
     if number_errors > 0:

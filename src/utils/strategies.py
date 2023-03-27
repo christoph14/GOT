@@ -6,7 +6,7 @@ import scipy.linalg as slg
 import torch
 
 from alignment import got_strategy, gw_strategy
-from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, Pgw
+from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, Pgw, find_trace_sink_wass_filters_reg
 from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
 from utils.help_functions import graph_from_laplacian
@@ -16,7 +16,7 @@ pygm.BACKEND = 'numpy'
 
 
 def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose=False, alpha=0.1, ones=True,
-                 epsilon=0.006):
+                 epsilon=0.006, filter_name=None, scale=False):
     """Return a strategy computing a transport plan from L1 to L2."""
     if strategy_name.lower() == 'got':
         def strategy(L1, L2):
@@ -37,22 +37,15 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
     elif strategy_name.lower() == 'fgot':
-        def strategy(L1, L2, epsilon=0.03, method='got'):
+        def strategy(L1, L2):
+            # TODO different tau than GOT
             # To avoid "Warning: numerical errors at iteration 0" increase epsilon
-            max_iter = epochs
-            tol = 1e-9
-            n = len(L1)
-            m = len(L2)
-            p = np.repeat(1 / n, n)
-            q = np.repeat(1 / m, m)
-            # TODO different tau than GOT?
-            g1 = get_filters(L1, method, tau)
-            g2 = get_filters(L2, method, tau)
-
-            gw, log = fgot_mgd.fgot(g1, g2, p, q, epsilon * np.max(g1) * np.max(g2) / n, max_iter=max_iter, tol=tol,
-                                    verbose=False, log=True, lapl=True)
-            gw *= n
-            return gw.T
+            T = find_trace_sink_wass_filters_reg(
+                L1, L2, epsilon, filter_name, tau, epochs
+            ).T
+            if scale:
+                T *= len(L1)
+            return T
     elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
             return gw_strategy(L1, L2)
