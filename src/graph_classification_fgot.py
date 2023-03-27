@@ -85,14 +85,15 @@ if __name__ == '__main__':
                            STRATEGY TEXT NOT NULL,
                            DATA TEXT NOT NULL,
                            SEED TEXT NOT NULL,
+                           FILTER TEXT,
                            ACCURACY REAL,
-                           unique (STRATEGY, DATA, SEED)
+                           unique (STRATEGY, DATA, SEED, FILTER)
                        )''')
     except sqlite3.OperationalError:
         pass
 
-    data = ('Pgot', args.dataset, args.seed, int(accuracy))
-    cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?) "
+    data = (args.algorithm, args.dataset, args.seed, args.filter, int(accuracy))
+    cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?, ?) "
                 "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy;", data)
     con.commit()
     cur.close()
