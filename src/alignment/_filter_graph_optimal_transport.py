@@ -1,6 +1,4 @@
-import networkx as nx
 import numpy as np
-import ot
 import scipy.linalg as slg
 
 from fGOT import fgot_mgd, fgot_stochastic_mgd
@@ -25,10 +23,6 @@ def P_nv2(L1, L2, it=10, tau=1):
     return fgot_stochastic_mgd.fgot_stochastic(get_filters(L2, 'sq'), get_filters(L1, 'sq'), it=it, tau=tau,
                                                n_samples=5, epochs=1000, lr=50*len(L1)*len(L2), std_init=5,
                                                loss_type='w_simple', tol=1e-12, adapt_lr=True)
-
-def Pgw(L1, L2):
-    """"""
-    return find_gw_distances(create_distance_matrix(L1), create_distance_matrix(L2), 2e-2)
 
 def find_trace_sink_wass_filters_reg(L1, L2, epsilon=7e-4, method='got', tau=0.2, max_iter=1000):
     n = len(L1)
@@ -56,15 +50,3 @@ def get_filters(L1, method, tau = 0.2):
     elif method == 'sq':
         g1 = L1 @ L1
     return g1
-
-def find_gw_distances(C1, C2, epsilon = 2e-2):
-    p = ot.unif(len(C1))
-    q = ot.unif(len(C2))
-    gw, log = ot.gromov.entropic_gromov_wasserstein(
-    C1, C2, p, q, 'square_loss', epsilon=epsilon, log=True, verbose=False)
-    return gw
-
-def create_distance_matrix(L):
-    g = nx.from_numpy_array(np.diag(np.diag(L)) - L)
-    C = nx.floyd_warshall_numpy(g)
-    return C

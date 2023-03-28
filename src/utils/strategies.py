@@ -5,8 +5,8 @@ import pygmtools as pygm
 import scipy.linalg as slg
 import torch
 
-from alignment import got_strategy, gw_strategy
-from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, Pgw, find_trace_sink_wass_filters_reg
+from alignment import got_strategy, gw_entropic
+from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, find_trace_sink_wass_filters_reg
 from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
 from utils.help_functions import graph_from_laplacian
@@ -48,7 +48,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return T
     elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
-            return gw_strategy(L1, L2)
+            return gw_entropic(L1, L2)
     elif strategy_name.lower() == 'rrmw':
         # Reweighted Random Walks for Graph Matching
         def strategy(L1, L2):
@@ -100,9 +100,6 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
     elif strategy_name.lower() == 'p_nv2':
         def strategy(L1, L2):
             return P_nv2(L1, L2, it=it, tau=tau) * len(L1)
-    elif strategy_name.lower() == 'pgw':
-        def strategy(L1, L2):
-            return Pgw(L1, L2).T * len(L1)
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng(seed)
