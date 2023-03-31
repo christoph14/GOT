@@ -5,10 +5,9 @@ import networkx as nx
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, zero_one_loss
-from sklearn.neighbors import KNeighborsClassifier
 
 from utils.distances import wasserstein_distance, gw_distance
-from utils.help_functions import random_permutation, graph_from_laplacian
+from utils.help_functions import random_permutation
 from utils.strategies import get_strategy
 
 # ArgumentParser
@@ -26,6 +25,7 @@ y = []
 
 n = 20
 graphs_per_class = 20
+n_graphs = 5 * graphs_per_class
 
 # Stochastic Block Model with 2 blocks (SBM2)
 sizes = [10, 10]
@@ -93,7 +93,7 @@ for _ in range(graphs_per_class):
 
 strategy = get_strategy(args.strategy, it=10, tau=5, n_samples=30, epochs=1500,
                         lr=0.2, alpha=0.1, ones=True, verbose=False)
-distances = np.full((100, 100), np.inf)
+distances = np.full((len(graphs), len(graphs)), np.inf)
 for i, L1 in enumerate(permuted_graphs):
     for j, L2 in enumerate(permuted_graphs):
         if i == j: continue
@@ -101,8 +101,8 @@ for i, L1 in enumerate(permuted_graphs):
         L_aligned = P.T @ L2 @ P
         if args.strategy.lower() in ['got', 'fgot']:
             distances[i, j] = wasserstein_distance(L1, L_aligned)
-        elif args.strategy.lower() in ['gw']:
-            distances[i,j] = gw_distance(graph_from_laplacian(L1), graph_from_laplacian(L_aligned))
+        # elif args.strategy.lower() in ['gw']:
+        #     distances[i,j] = gw_distance(graph_from_laplacian(L1), graph_from_laplacian(L_aligned))
         else:
             distances[i,j] = np.linalg.norm(L1 - L_aligned, ord='fro')
     sys.stdout.write(f'\r{i + 1} graphs done')
@@ -110,12 +110,12 @@ for i, L1 in enumerate(permuted_graphs):
 y = np.array(y)
 nearest_neighbors = np.nanargmin(distances, axis=0)
 y_pred = y[nearest_neighbors]
-accuracy = len(y) - zero_one_loss(y, y_pred, normalize=False)
+accuracy = len(graphs) - zero_one_loss(y, y_pred, normalize=False)
 
 print()
 print(confusion_matrix(y, y_pred))
-print('Correct classifications:', np.trace(confusion_matrix(y, y_pred)))
+print('Correct classifications:', accuracy)
 ConfusionMatrixDisplay.from_predictions(y, y_pred, colorbar=False)
-plt.title(f'{args.strategy}: {100-zero_one_loss(y, y_pred, normalize=False)}/100')
+plt.title(f'{args.strategy}: {accuracy}/{len(graphs)}')
 plt.savefig(f'../plots/confusion_matrix_{args.strategy}.pdf', bbox_inches='tight')
 plt.show()
