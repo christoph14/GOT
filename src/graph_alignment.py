@@ -1,16 +1,14 @@
-import os
 import argparse
+import os
 import sqlite3
 
 import networkx as nx
 import numpy as np
 
 from utils import check_soft_assignment, check_permutation_matrix
-from utils.distances import gw_distance
-from utils.strategies import get_strategy
 from utils.help_functions import remove_edges, graph_from_laplacian
-from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss
-
+from utils.loss_functions import w2_loss, l2_loss, l2_inv_loss, gw_loss
+from utils.strategies import get_strategy
 
 # ArgumentParser
 parser = argparse.ArgumentParser(description='Evaluates graph alignment algorithms.')
@@ -92,6 +90,7 @@ for p in p_values:
     G_reduced = remove_edges(G1, communities, between_probability=p, within_probability=0.5, seed=args.seed)
     L_reduced = nx.laplacian_matrix(G_reduced, range(n)).todense()
     L2 = P_true @ L_reduced @ P_true.T
+    G2 = graph_from_laplacian(L2)
 
     # Calculate permutation and different losses for every strategy
     for strategy, name in zip(strategies, strategy_names):
@@ -107,7 +106,7 @@ for p in p_values:
         w2_error = w2_loss(L1, L2, P_estimated)
         l2_error = l2_loss(L1, L2, P_estimated)
         l2_inv_error = l2_inv_loss(L1, L2, P_estimated, args.alpha, ones=True)
-        gw_error = gw_distance(G1, G_aligned)
+        gw_error = gw_loss(G1, G2, P_estimated)
         w2_errors[name].append(w2_error)
         l2_errors[name].append(l2_error)
         l2_inv_errors[name].append(l2_inv_error)
