@@ -6,8 +6,8 @@ import scipy.linalg as slg
 import torch
 from scipy.optimize import quadratic_assignment
 
-from alignment import got_strategy, gw_entropic
-from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, find_trace_sink_wass_filters_reg
+from alignment import got_strategy, gw_entropic, ipfp
+from alignment._filter_graph_optimal_transport import PstoH, P_nv2, find_trace_sink_wass_filters_reg
 from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
 from utils.help_functions import graph_from_laplacian
@@ -70,31 +70,11 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             X = pygm.hungarian(X)
             return X.T
     elif strategy_name.lower() == 'ipfp':
-        # Integer Projected Fixed Point from
-        # "An integer projected fixed point method for graph matching and map inference."
         def strategy(L1, L2):
-            G1 = graph_from_laplacian(L1)
-            G2 = graph_from_laplacian(L2)
-            n1 = G1.number_of_nodes()
-            n2 = G2.number_of_nodes()
-            A1 = nx.adjacency_matrix(G1).todense()
-            A2 = nx.adjacency_matrix(G2).todense()
-
-            conn1, edge1 = pygm.utils.dense_to_sparse(A1)
-            conn2, edge2 = pygm.utils.dense_to_sparse(A2)
-            import functools
-            gaussian_aff = functools.partial(pygm.utils.gaussian_aff_fn, sigma=.1)  # set affinity function
-            K = pygm.utils.build_aff_mat(None, edge1, conn1, None, edge2, conn2, [n1], None, [n2], None,
-                                         edge_aff_fn=gaussian_aff)
-            X = pygm.ipfp(K, n1, n2) * n1
-            X = pygm.hungarian(X)
-            return X.T
-    elif strategy_name.lower() == 'plsq':
+            return ipfp(L1, L2).T
+    elif strategy_name.lower() == 'ipfp-got':
         def strategy(L1, L2):
-            return PLsq(L1, L2, epsilon=epsilon, epochs=epochs).T * len(L1)
-    elif strategy_name.lower() == 'pgot':
-        def strategy(L1, L2):
-            return Pgot(L1, L2, epsilon=epsilon, epochs=epochs).T * len(L1)
+            return ipfp(L1, L2, affinity='got').T
     elif strategy_name.lower() == 'pstoh':
         def strategy(L1, L2):
             return PstoH(L1, L2, it=it, tau=tau) * len(L1)
