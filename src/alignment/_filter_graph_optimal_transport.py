@@ -36,9 +36,9 @@ def find_trace_sink_wass_filters_reg(L1, L2, epsilon=7e-4, method='got', tau=0.2
 
     return gw
 
-def get_filters(L1, method, tau = 0.2):
+def get_filters(L1, method, tau=0.2):
     if method == 'got':
-        g1 = np.real(slg.sqrtm(fgot_mgd.regularise_invert_one(L1,alpha = 0.1, ones = False )))
+        g1 = np.real(slg.sqrtm(fgot_mgd.regularise_invert_one(L1, alpha = 0.1, ones=False )))
     elif method == 'weight':
         g1 = np.diag(np.diag(L1)) - L1
     elif method == 'heat':
@@ -49,4 +49,6 @@ def get_filters(L1, method, tau = 0.2):
         g1 = L1
     elif method == 'sq':
         g1 = L1 @ L1
+    else:
+        raise ValueError("The given filter is not valid.")
     return g1
