@@ -4,6 +4,7 @@ import ot
 import pygmtools as pygm
 import scipy.linalg as slg
 import torch
+from scipy.optimize import quadratic_assignment
 
 from alignment import got_strategy, gw_entropic
 from alignment._filter_graph_optimal_transport import PLsq, Pgot, PstoH, P_nv2, find_trace_sink_wass_filters_reg
@@ -100,6 +101,13 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
     elif strategy_name.lower() == 'p_nv2':
         def strategy(L1, L2):
             return P_nv2(L1, L2, it=it, tau=tau) * len(L1)
+    elif strategy_name.lower() == 'qap':
+        def strategy(L1, L2):
+            L1_inv = slg.pinv(L1)
+            L2_inv = slg.pinv(L2)
+            res = quadratic_assignment(L2_inv.T, L1_inv, method='2opt', options={'maximize': True})
+            P = np.eye(len(L1), dtype=int)[res['col_ind']]
+            return P
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng(seed)
