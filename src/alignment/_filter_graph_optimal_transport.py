@@ -4,14 +4,6 @@ import scipy.linalg as slg
 from fGOT import fgot_mgd, fgot_stochastic_mgd
 
 
-def PLsq(L1, L2, epsilon=0.003, epochs=1000):
-    """$g(L) = L^2$"""
-    return find_trace_sink_wass_filters_reg(L1, L2, epsilon, 'sq', max_iter=epochs)
-
-def Pgot(L1, L2, epsilon=0.006, epochs=1000):
-    """$g(L) = L^{\dagger/2}$"""
-    return find_trace_sink_wass_filters_reg(L1, L2, epsilon, 'got', max_iter=epochs)
-
 def PstoH(L1, L2, it=10, tau=1):
     """$g(L) = L^{\dagger/2}$ stochastic"""
     return fgot_stochastic_mgd.fgot_stochastic(get_filters(L2, 'got'), get_filters(L1, 'got'), it=it, tau=tau,
