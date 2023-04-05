@@ -143,9 +143,9 @@ cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l
                 " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss, gw_loss=excluded.gw_loss", data)
 con.commit()
 
-os.makedirs(args.path, exist_ok=True)
-for name in strategy_names:
-    np.savetxt(f'{args.path}/l2_inv_error_{name}#{args.seed}.csv', l2_inv_errors[name])
-    np.savetxt(f'{args.path}/w2_error_{name}#{args.seed}.csv', w2_errors[name])
-    np.savetxt(f'{args.path}/l2_error_{name}#{args.seed}.csv', l2_errors[name])
-    np.savetxt(f'{args.path}/gw_error_{name}#{args.seed}.csv', gw_errors[name])
+# os.makedirs(args.path, exist_ok=True)
+# for name in strategy_names:
+#     np.savetxt(f'{args.path}/l2_inv_error_{name}#{args.seed}.csv', l2_inv_errors[name])
+#     np.savetxt(f'{args.path}/w2_error_{name}#{args.seed}.csv', w2_errors[name])
+#     np.savetxt(f'{args.path}/l2_error_{name}#{args.seed}.csv', l2_errors[name])
+#     np.savetxt(f'{args.path}/gw_error_{name}#{args.seed}.csv', gw_errors[name])
