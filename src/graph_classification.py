@@ -16,7 +16,7 @@ parser.add_argument('strategy', type=str, help='the strategy to be performed')
 parser.add_argument('--seed', type=int, help='the random seed')
 args = parser.parse_args()
 
-rng = np.random.default_rng(74196)
+rng = np.random.default_rng(args.seed)
 
 graphs = []
 permuted_graphs = []
