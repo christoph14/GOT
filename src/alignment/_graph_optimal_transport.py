@@ -1,8 +1,9 @@
 import numpy as np
-import torch
-torch.set_default_tensor_type('torch.DoubleTensor')
-import scipy.linalg as slg
 import numpy.linalg as lg
+import scipy.linalg as slg
+import torch
+
+torch.set_default_tensor_type('torch.DoubleTensor')
 
 
 def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42, verbose=True, alpha=0.0, ones=True):
@@ -141,7 +142,10 @@ def loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type):
         loss_c = torch.trace(L1_inv) + torch.trace(torch.transpose(DS, 0, 1) @ L2_inv @ DS)
         # svd version
         sigma = torch.linalg.svdvals(C2_tilde @ DS @ C1_tilde)
-        cost = loss_c - 2 * torch.sum(sigma) #torch.abs(sigma))
+        cost = loss_c - 2 * torch.sum(sigma)
+    elif loss_type == 'w-fast':
+        # Not equivalent but same optimum as loss type w
+        cost = - torch.trace(L1_inv @ DS.T @ L2_inv @ DS)
     elif loss_type == 'l2':
         cost = torch.sum((DS.T @ L2 @ DS - L1) ** 2, dim=1).sum()
     elif loss_type == 'l2-inv':
