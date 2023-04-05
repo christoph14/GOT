@@ -56,7 +56,6 @@ def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42,
     history = []
     for epoch in range(epochs):
         cost = 0
-        cost_vec = np.zeros((1, n_samples))
         for sample in range(n_samples):
             # Sampling
             eps = torch.randn(n, n)
@@ -65,7 +64,6 @@ def got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='w', seed=42,
             # Cost function
             DS = doubly_stochastic(P_noisy, tau, it)
             cost = cost + loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type)
-            cost_vec[0, sample] = loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type)
         cost = cost / n_samples
 
         # Gradient step
@@ -142,7 +140,7 @@ def loss(DS, L1, L2, L1_inv, L2_inv, params, loss_type):
         [C1_tilde, C2_tilde] = params
         loss_c = torch.trace(L1_inv) + torch.trace(torch.transpose(DS, 0, 1) @ L2_inv @ DS)
         # svd version
-        u, sigma, v = torch.svd(C2_tilde @ DS @ C1_tilde)
+        sigma = torch.linalg.svdvals(C2_tilde @ DS @ C1_tilde)
         cost = loss_c - 2 * torch.sum(sigma) #torch.abs(sigma))
     elif loss_type == 'l2':
         cost = torch.sum((DS.T @ L2 @ DS - L1) ** 2, dim=1).sum()
