@@ -33,6 +33,8 @@ p = [[0.75, 0.15],
      [0.15, 0.75]]
 for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p, seed=rng)
+    while not nx.is_connected(G):
+        G = nx.stochastic_block_model(sizes, p, seed=rng)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n, rng)
     graphs.append(L)
@@ -47,6 +49,8 @@ p = [[0.80, 0.25, 0.25],
      [0.25, 0.25, 0.80]]
 for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p, seed=rng)
+    while not nx.is_connected(G):
+        G = nx.stochastic_block_model(sizes, p, seed=rng)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n, rng)
     graphs.append(L)
@@ -60,6 +64,8 @@ for _ in range(graphs_per_class):
     # 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, ...
     degree = 8
     G = nx.random_regular_graph(degree, n, seed=rng)
+    while not nx.is_connected(G):
+        G = nx.random_regular_graph(degree, n, seed=rng)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n, rng)
     graphs.append(L)
@@ -71,7 +77,10 @@ for _ in range(graphs_per_class):
 for _ in range(graphs_per_class):
     # Exactly (n-m) * m edges
     # 19, 36, 51, 64, 75, 84, 91, 96, 99, 100, 99, 96, ...
-    G = nx.barabasi_albert_graph(n, 6, seed=rng)
+    m = 5
+    G = nx.barabasi_albert_graph(n, m, seed=rng)
+    while not nx.is_connected(G):
+        G = nx.barabasi_albert_graph(n, m, seed=rng)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n, rng)
     graphs.append(L)
@@ -83,7 +92,10 @@ for _ in range(graphs_per_class):
 for _ in range(graphs_per_class):
     # Exactly (n/2) * k edges, k even
     # 20, 40, 60, 80, 100, ...
-    G = nx.watts_strogatz_graph(n, k=8, p=0.2, seed=rng)
+    k = 8
+    G = nx.watts_strogatz_graph(n, k, p=0.5, seed=rng)
+    while not nx.is_connected(G):
+        G = nx.watts_strogatz_graph(n, k, p=0.5, seed=rng)
     L = np.double(np.array(nx.laplacian_matrix(G, range(n)).todense()))
     P = random_permutation(n, rng)
     graphs.append(L)
