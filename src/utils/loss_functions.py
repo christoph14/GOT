@@ -1,3 +1,4 @@
+import networkx as nx
 import numpy as np
 import scipy.linalg as slg
 
@@ -20,3 +21,33 @@ def w2_loss(x, y, P, alpha=0, ones=True):
     root = slg.sqrtm(A)
     result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(root @ B @ root))
     return result.real
+
+
+def gw_loss(G1, G2, T, p=None, q=None, atol=0.01):
+    """Compute the GW loss for graphs G1, G2 and coupling T between p and q"""
+    # Compute the shortest path matrices
+    C1 = nx.floyd_warshall_numpy(G1)
+    C2 = nx.floyd_warshall_numpy(G2)
+
+    # Set default distributions in none are given
+    if p is None:
+        n1 = len(C1)
+        p = np.full(n1, 1/n1)
+    if q is None:
+        n2 = len(C2)
+        q = np.full(n2, 1/n2)
+
+    # Check coupling
+    if not np.allclose(np.sum(T, axis=1), p, atol=atol):
+        print(np.sum(T, axis=1))
+        print(p)
+        raise ValueError("The given coupling is not valid.")
+    if not np.allclose(np.sum(T, axis=0), q, atol=atol):
+        print(np.sum(T, axis=0))
+        print(q)
+        raise ValueError("The given coupling is not valid.")
+    return np.sum([[[[(C1[i,k] - C2[j,l])**2 * T[i,j] * T[k,l]
+                      for l in range(10)]
+                     for k in range(10)]
+                    for j in range(10)]
+                   for i in range(10)])
