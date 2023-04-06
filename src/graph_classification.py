@@ -1,19 +1,21 @@
-import sys
 import argparse
+import sys
 
 import networkx as nx
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, zero_one_loss
 
-from utils.distances import wasserstein_distance, gw_distance
-from utils.help_functions import random_permutation
+from utils.distances import wasserstein_distance
+from utils.help_functions import random_permutation, graph_from_laplacian
+from utils.loss_functions import gw_loss
 from utils.strategies import get_strategy
 
 # ArgumentParser
 parser = argparse.ArgumentParser(description='Evaluates graph classification algorithms.')
 parser.add_argument('strategy', type=str, help='the strategy to be performed')
 parser.add_argument('--seed', type=int, help='the random seed')
+parser.add_argument('--filter', type=str)
 args = parser.parse_args()
 
 rng = np.random.default_rng(args.seed)
@@ -29,8 +31,8 @@ n_graphs = 5 * graphs_per_class
 
 # Stochastic Block Model with 2 blocks (SBM2)
 sizes = [10, 10]
-p = [[0.75, 0.15],
-     [0.15, 0.75]]
+p = [[0.7, 0.1],
+     [0.1, 0.7]]
 for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p, seed=rng)
     while not nx.is_connected(G):
@@ -43,10 +45,10 @@ for _ in range(graphs_per_class):
     y.append(0)
 
 # Stochastic Block Model with 3 blocks (SBM3)
-sizes = [8, 8, 4]
-p = [[0.80, 0.25, 0.25],
-     [0.25, 0.80, 0.25],
-     [0.25, 0.25, 0.80]]
+sizes = [7, 7, 6]
+p = [[0.85, 0.15, 0.15],
+     [0.15, 0.85, 0.15],
+     [0.15, 0.15, 0.85]]
 for _ in range(graphs_per_class):
     G = nx.stochastic_block_model(sizes, p, seed=rng)
     while not nx.is_connected(G):
@@ -62,7 +64,7 @@ for _ in range(graphs_per_class):
 for _ in range(graphs_per_class):
     # Exactly (n/2) * degree edges
     # 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, ...
-    degree = 8
+    degree = 7
     G = nx.random_regular_graph(degree, n, seed=rng)
     while not nx.is_connected(G):
         G = nx.random_regular_graph(degree, n, seed=rng)
@@ -102,19 +104,20 @@ for _ in range(graphs_per_class):
     permuted_graphs.append(P @ L @ P.T)
     permutation_matrices.append(P)
     y.append(4)
+print("All graphs created, start aligning graphs ...")
 
-strategy = get_strategy(args.strategy, it=10, tau=5, n_samples=30, epochs=1500,
-                        lr=0.2, alpha=0.1, ones=True, verbose=False)
+strategy = get_strategy(args.strategy, it=10, tau=5, n_samples=30, epochs=20,
+                        lr=0.2, alpha=0.1, ones=True, verbose=False, filter_name=args.filter, epsilon=0.008)
 distances = np.full((len(graphs), len(graphs)), np.inf)
 for i, L1 in enumerate(permuted_graphs):
     for j, L2 in enumerate(permuted_graphs):
         if i == j: continue
         P = strategy(L1, L2)
         L_aligned = P.T @ L2 @ P
-        if args.strategy.lower() in ['got', 'fgot']:
+        if args.strategy.lower() in ['got', 'fgot', 'ipfp-got']:
             distances[i, j] = wasserstein_distance(L1, L_aligned)
-        # elif args.strategy.lower() in ['gw']:
-        #     distances[i,j] = gw_distance(graph_from_laplacian(L1), graph_from_laplacian(L_aligned))
+        elif args.strategy.lower() in ['gw']:
+             distances[i,j] = gw_loss(graph_from_laplacian(L1), graph_from_laplacian(L_aligned), P.T / n)
         else:
             distances[i,j] = np.linalg.norm(L1 - L_aligned, ord='fro')
     sys.stdout.write(f'\r{i + 1} graphs done')
