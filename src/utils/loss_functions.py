@@ -30,11 +30,11 @@ def gw_loss(G1, G2, T, p=None, q=None, atol=0.01):
     C2 = nx.floyd_warshall_numpy(G2)
 
     # Set default distributions in none are given
+    n1 = len(C1)
+    n2 = len(C2)
     if p is None:
-        n1 = len(C1)
         p = np.full(n1, 1/n1)
     if q is None:
-        n2 = len(C2)
         q = np.full(n2, 1/n2)
 
     # Check coupling
@@ -47,7 +47,7 @@ def gw_loss(G1, G2, T, p=None, q=None, atol=0.01):
         print(q)
         raise ValueError("The given coupling is not valid.")
     return np.sum([[[[(C1[i,k] - C2[j,l])**2 * T[i,j] * T[k,l]
-                      for l in range(10)]
-                     for k in range(10)]
-                    for j in range(10)]
-                   for i in range(10)])
+                      for l in range(n2)]
+                     for k in range(n1)]
+                    for j in range(n2)]
+                   for i in range(n1)])
