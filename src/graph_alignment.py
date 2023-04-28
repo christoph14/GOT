@@ -127,7 +127,7 @@ for p in p_values:
         print(f'p = {p:.2f} done.')
 
 # Save results in database
-con = sqlite3.connect(f'{args.path}/results.db')
+con = sqlite3.connect(f'{args.path}/results_got.db')
 cur = con.cursor()
 try:
     cur.execute('''CREATE TABLE alignment (
@@ -145,6 +145,8 @@ except sqlite3.OperationalError:
 cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss, :gw_loss)"
                 " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss, gw_loss=excluded.gw_loss", data)
 con.commit()
+cur.close()
+con.close()
 
 # os.makedirs(args.path, exist_ok=True)
 # for name in strategy_names:
