@@ -110,7 +110,7 @@ for p in p_values:
         w2_error = w2_loss(L1, L2, P_estimated)
         l2_error = l2_loss(L1, L2, P_estimated)
         l2_inv_error = l2_inv_loss(L1, L2, P_estimated, args.alpha, ones=True)
-        gw_error = gw_loss(G1, G2, P_estimated)
+        gw_error = gw_loss(G1, G2, P_estimated.T / n)
         w2_errors[name].append(w2_error)
         l2_errors[name].append(l2_error)
         l2_inv_errors[name].append(l2_inv_error)
