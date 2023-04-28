@@ -15,20 +15,23 @@ parser = argparse.ArgumentParser(description='Evaluates graph alignment algorith
 parser.add_argument('strategies', type=str, nargs='+', help='the strategies to be performed')
 parser.add_argument('seed', type=int, help='the used random seed')
 # Experiment parameters
-parser.add_argument('--within_probability', dest='within_probability', type=float, default=0.7)
-parser.add_argument('--between_probability', dest='between_probability', type=float, default=0.1)
-parser.add_argument('--graph_size', dest='graph_size', type=int, default=40)
+parser.add_argument('--within_probability', type=float, default=0.7)
+parser.add_argument('--between_probability', type=float, default=0.1)
+parser.add_argument('--graph_size', type=int, default=40)
 # GOT parameters
-parser.add_argument('--alpha', dest='alpha', type=float, default=0.1, help='the regularization factor')
-parser.add_argument('--it', dest='it', type=int, default=10, help='number of Sinkhorn iterations')
-parser.add_argument('--tau', dest='tau', type=float, default=5, help='the Sinkhorn parameter')
-parser.add_argument('--sampling_size', dest='sampling_size', type=int, default=30, help='the sampling size')
-parser.add_argument('--iterations', dest='iterations', type=int, default=3000, help='the number of iterations')
-parser.add_argument('--lr', dest='lr', type=float, default=0.2, help='the learning rate')
+parser.add_argument('--alpha', type=float, default=0.1, help='the regularization factor')
+parser.add_argument('--it', type=int, default=10, help='number of Sinkhorn iterations')
+parser.add_argument('--tau', type=float, default=5, help='the Sinkhorn parameter')
+parser.add_argument('--sampling_size', type=int, default=30, help='the sampling size')
+parser.add_argument('--iterations', type=int, default=3000, help='the number of iterations')
+parser.add_argument('--lr', type=float, default=0.2, help='the learning rate')
+# fGOT parameters
+parser.add_argument('--filter', type=str)
+parser.add_argument('--epsilon', type=float, default=5e-3)
 # General parameters
-parser.add_argument('--path', dest='path', type=str, default='../results/', help='the path to store the output files')
-parser.add_argument('--ignore_log', dest='ignore_log', action='store_const', const=True, default=False, help='disables the log')
-parser.add_argument('--allow_soft_assignment', dest='allow_soft_assignment', action='store_const', const=True,
+parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
+parser.add_argument('--ignore_log', action='store_const', const=True, default=False, help='disables the log')
+parser.add_argument('--allow_soft_assignment', action='store_const', const=True,
                     default=False, help='allow soft assignment instead of a permutation matrix')
 args = parser.parse_args()
 
@@ -38,7 +41,8 @@ os.makedirs(args.path, exist_ok=True)
 # Get strategies
 strategy_names = args.strategies
 strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampling_size, epochs=args.iterations,
-                           lr=args.lr, alpha=args.alpha, ones=True, verbose=False) for name in strategy_names]
+                           lr=args.lr, alpha=args.alpha, filter_name=args.filter, epsilon=args.epsilon, scale=True,
+                           ones=True, verbose=False) for name in strategy_names]
 
 if not args.ignore_log:
     print('Algorithms:', args.strategies)
