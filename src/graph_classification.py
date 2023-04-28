@@ -109,7 +109,7 @@ for _ in range(graphs_per_class):
 print("All graphs created, start aligning graphs ...")
 
 strategy = get_strategy(args.strategy, it=10, tau=5, n_samples=30, epochs=20,
-                        lr=0.2, alpha=0.1, ones=True, verbose=False, filter_name=args.filter, epsilon=0.008)
+                        lr=0.2, alpha=0.1, ones=True, verbose=False, filter_name=args.filter, epsilon=0.01, scale=True)
 distances = np.full((len(graphs), len(graphs)), np.inf)
 for i, L1 in enumerate(permuted_graphs):
     for j, L2 in enumerate(permuted_graphs):
@@ -119,7 +119,7 @@ for i, L1 in enumerate(permuted_graphs):
         if args.strategy.lower() in ['got', 'fgot', 'ipfp-got']:
             distances[i, j] = wasserstein_distance(L1, L_aligned)
         elif args.strategy.lower() in ['gw']:
-             distances[i,j] = gw_loss(graph_from_laplacian(L1), graph_from_laplacian(L_aligned), P.T / n)
+             distances[i,j] = gw_loss(graph_from_laplacian(L1), graph_from_laplacian(L2), P.T / n)
         else:
             distances[i,j] = np.linalg.norm(L1 - L_aligned, ord='fro')
     sys.stdout.write(f'\r{i + 1} graphs done')
