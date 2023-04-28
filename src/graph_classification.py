@@ -1,4 +1,5 @@
 import argparse
+import sqlite3
 import sys
 
 import networkx as nx
@@ -16,6 +17,7 @@ parser = argparse.ArgumentParser(description='Evaluates graph classification alg
 parser.add_argument('strategy', type=str, help='the strategy to be performed')
 parser.add_argument('--seed', type=int, help='the random seed')
 parser.add_argument('--filter', type=str)
+parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
 args = parser.parse_args()
 
 rng = np.random.default_rng(args.seed)
@@ -132,5 +134,25 @@ print(confusion_matrix(y, y_pred))
 print('Correct classifications:', accuracy)
 ConfusionMatrixDisplay.from_predictions(y, y_pred, colorbar=False)
 plt.title(f'{args.strategy}: {accuracy}/{len(graphs)}')
-plt.savefig(f'../plots/confusion_matrix_{args.strategy}.pdf', bbox_inches='tight')
+plt.savefig(f'../plots/confusion_matrix_{args.strategy}_{args.seed}.pdf', bbox_inches='tight')
 plt.show()
+
+# Save results in database
+con = sqlite3.connect(f'{args.path}/results_got.db')
+cur = con.cursor()
+try:
+    cur.execute('''CREATE TABLE classification (
+                       STRATEGY TEXT NOT NULL,
+                       SEED TEXT NOT NULL,
+                       ACCURACY INT,
+                       unique (STRATEGY, SEED)
+                   )''')
+except sqlite3.OperationalError:
+    pass
+
+data = (args.strategy, args.seed, int(accuracy))
+cur.execute("INSERT INTO classification VALUES (?, ?, ?) "
+            "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy;", data)
+con.commit()
+cur.close()
+con.close()
