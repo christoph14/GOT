@@ -26,6 +26,10 @@ parser.add_argument('--tau', type=float, default=5, help='the Sinkhorn parameter
 parser.add_argument('--sampling_size', type=int, default=30, help='the sampling size')
 parser.add_argument('--iterations', type=int, default=3000, help='the number of iterations')
 parser.add_argument('--lr', type=float, default=0.2, help='the learning rate')
+# fGOT parameters
+parser.add_argument('--filter', type=str)
+parser.add_argument('--epsilon', type=float, default=5e-3)
+# General parameters
 # General parameters
 parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
 parser.add_argument('--ignore_log', action='store_const', const=True, default=False, help='disables the log')
@@ -36,7 +40,8 @@ args = parser.parse_args()
 # Get strategies
 strategy_names = args.strategies
 strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampling_size, epochs=args.iterations,
-                           lr=args.lr, alpha=args.alpha, ones=True, verbose=False) for name in strategy_names]
+                           lr=args.lr, alpha=args.alpha, ones=True, verbose=False, filter_name=args.filter,
+                           epsilon=args.epsilon) for name in strategy_names]
 
 if not args.ignore_log:
     print('Algorithms:', args.strategies)
