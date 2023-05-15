@@ -39,22 +39,19 @@ def fgot(root1, root2, p, q, epsilon, max_iter=300, tol=1e-9, verbose=False, log
     if log:
         log = {'err': []}
 
-    while (err > tol and cpt < max_iter):
-
+    while err > tol and cpt < max_iter:
+        # Evaluate gradient and update T
         Tprev = T
-        tens = fgot_grad(root1, root2, T)    
+        tens = fgot_grad(root1, root2, T)
         T = sinkhorn(p, q, tens, epsilon)
-        
+
+        # Save log and print loss
         if cpt % 10 == 0:
             err = np.linalg.norm(T - Tprev)
-
             if log:
                 log['err'].append(err)
-
             if verbose:
                 print('GOT loss:', fgot_loss(tr1, root1, root2, T))
-
-
         cpt += 1
 
     if log:
@@ -62,5 +59,3 @@ def fgot(root1, root2, p, q, epsilon, max_iter=300, tol=1e-9, verbose=False, log
         return T, log
     else:
         return T
-    
-
