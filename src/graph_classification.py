@@ -116,7 +116,7 @@ for i, L1 in enumerate(permuted_graphs):
         if i == j: continue
         P = strategy(L1, L2)
         L_aligned = P.T @ L2 @ P
-        if args.strategy.lower() in ['got', 'fgot', 'ipfp-got']:
+        if args.strategy.lower() in ['got', 'fgot', 'ipfp-got', 'qap-got']:
             distances[i, j] = wasserstein_distance(L1, L_aligned)
         elif args.strategy.lower() in ['gw']:
              distances[i,j] = gw_loss(graph_from_laplacian(L1), graph_from_laplacian(L2), P.T / n)
