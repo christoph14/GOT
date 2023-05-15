@@ -1,6 +1,7 @@
 import os
 import argparse
 import sqlite3
+from time import time
 
 import networkx as nx
 import numpy as np
@@ -30,7 +31,6 @@ parser.add_argument('--lr', type=float, default=0.2, help='the learning rate')
 parser.add_argument('--filter', type=str)
 parser.add_argument('--epsilon', type=float, default=5e-3)
 # General parameters
-# General parameters
 parser.add_argument('--path', type=str, default='../results/', help='the path to store the output files')
 parser.add_argument('--ignore_log', action='store_const', const=True, default=False, help='disables the log')
 parser.add_argument('--allow_soft_assignment', action='store_const', const=True,
@@ -41,7 +41,7 @@ args = parser.parse_args()
 strategy_names = args.strategies
 strategies = [get_strategy(name, it=args.it, tau=args.tau, n_samples=args.sampling_size, epochs=args.iterations,
                            lr=args.lr, alpha=args.alpha, ones=True, verbose=False, filter_name=args.filter,
-                           epsilon=args.epsilon) for name in strategy_names]
+                           epsilon=args.epsilon, scale=True) for name in strategy_names]
 
 if not args.ignore_log:
     print('Algorithms:', args.strategies)
@@ -64,7 +64,9 @@ for p in p_values:
     # Calculate permutation and different losses for every strategy
     for strategy, name in zip(strategies, strategy_names):
         # Find permutation
+        start_time = time()
         P_estimated = strategy(L1, L2)
+        running_time = time() - start_time
         if args.allow_soft_assignment:
             P_estimated = check_soft_assignment(P_estimated, atol=1e-02)
         else:
@@ -79,6 +81,7 @@ for p in p_values:
              'p' : p,
              'w2_loss' : w2_error,
              'l2_loss' : l2_error,
+             'time': running_time,
             }
         )
     if not args.ignore_log:
@@ -95,13 +98,15 @@ try:
                        P REAL NOT NULL,
                        W2_LOSS REAL,
                        L2_LOSS REAL,
+                       TIME REAL,
                        unique (STRATEGY, SEED, P)
                    )''')
 except sqlite3.OperationalError:
     pass
 
-cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss)"
-                " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss", data)
+cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss, :time)"
+                " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss, time=excluded.time",
+                data)
 con.commit()
 cur.close()
 con.close()
