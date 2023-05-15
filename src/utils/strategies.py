@@ -3,8 +3,8 @@ import numpy as np
 import ot
 import pygmtools as pygm
 import scipy.linalg as slg
-import torch
 from scipy.optimize import quadratic_assignment
+import torch
 
 from alignment import got_strategy, gw_entropic, ipfp
 from alignment._filter_graph_optimal_transport import PstoH, P_nv2, find_trace_sink_wass_filters_reg
@@ -37,7 +37,11 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
         def strategy(L1, L2):
             return got_strategy(L1, L2, it, tau, n_samples, epochs, lr, loss_type='l2-inv', seed=seed, verbose=verbose,
                                 alpha=alpha, ones=ones)
-    elif strategy_name.lower() == 'fgot':
+    elif strategy_name.lower().startswith('fgot'):
+        if len(strategy_name.split("-")) > 1:
+            if filter_name is not None:
+                print('The given filter is not used because it is specified by the algo name.')
+            filter_name = strategy_name.lower().split("-")[1]
         def strategy(L1, L2):
             # TODO different tau than GOT
             # To avoid "Warning: numerical errors at iteration 0" increase epsilon
@@ -93,6 +97,16 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             L1_inv = slg.pinv(L1)
             L2_inv = slg.pinv(L2)
             res = quadratic_assignment(L2_inv.T, L1_inv, method='2opt', options={'maximize': True})
+            P = np.eye(len(L1), dtype=int)[res['col_ind']]
+            return P
+    elif strategy_name.lower().startswith('qap'):
+        if len(strategy_name.split("-")) > 1:
+            if filter_name is not None:
+                print('The given filter is not used because it is specified by the algo name.')
+            filter_name = strategy_name.split("-")[1]
+        def strategy(L1, L2):
+            g1, g2 = get_filters(L1, filter_name), get_filters(L2, filter_name)
+            res = quadratic_assignment(g2.T, g1, method='2opt', options={'maximize': True})
             P = np.eye(len(L1), dtype=int)[res['col_ind']]
             return P
     elif strategy_name.lower() == 'random':
