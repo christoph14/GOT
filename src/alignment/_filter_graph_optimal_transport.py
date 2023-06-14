@@ -24,7 +24,10 @@ def find_trace_sink_wass_filters_reg(L1, L2, epsilon=7e-4, method='got', tau=0.2
     g1= get_filters(L1, method, tau)
     g2= get_filters(L2, method, tau)
 
-    gw = fgot_mgd.fgot(g1, g2, p, q, epsilon*np.max(g1)*np.max(g2)/n, max_iter=max_iter, tol=1e-9, lapl=True)
+    # Scale epsilon
+    epsilon = epsilon * (np.max(g1) * np.max(g2)) / np.sqrt(n * m)
+
+    gw = fgot_mgd.fgot(g1, g2, p, q, epsilon, max_iter=max_iter, tol=1e-9, lapl=True)
 
     return gw
 
