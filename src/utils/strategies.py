@@ -92,22 +92,30 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
     elif strategy_name.lower() == 'p_nv2':
         def strategy(L1, L2):
             return P_nv2(L1, L2, it=it, tau=tau) * len(L1)
-    elif strategy_name.lower() == 'qap':
-        def strategy(L1, L2):
-            L1_inv = slg.pinv(L1)
-            L2_inv = slg.pinv(L2)
-            res = quadratic_assignment(L2_inv.T, L1_inv, method='2opt', options={'maximize': True})
-            P = np.eye(len(L1), dtype=int)[res['col_ind']]
-            return P
+    # elif strategy_name.lower() == 'qap':
+    #     # TODO remove (include in next?)
+    #     def strategy(L1, L2):
+    #         L1_inv = slg.pinv(L1)
+    #         L2_inv = slg.pinv(L2)
+    #         res = quadratic_assignment(L2_inv.T, L1_inv, method='2opt', options={'maximize': True})
+    #         P = np.eye(len(L1), dtype=int)[res['col_ind']]
+    #         return P
     elif strategy_name.lower().startswith('qap'):
         if len(strategy_name.split("-")) > 1:
             if filter_name is not None:
                 print('The given filter is not used because it is specified by the algo name.')
             filter_name = strategy_name.split("-")[1]
         def strategy(L1, L2):
-            g1, g2 = get_filters(L1, filter_name), get_filters(L2, filter_name)
+            # Add dummy nodes
+            n = max(len(L1), len(L2))
+            L1_ = np.zeros((n,n))
+            L2_ = np.zeros((n,n))
+            L1_[:len(L1), :len(L1)] = L1
+            L2_[:len(L2), :len(L2)] = L2
+            g1, g2 = get_filters(L1_, filter_name), get_filters(L2_, filter_name)
             res = quadratic_assignment(g2.T, g1, method='2opt', options={'maximize': True})
-            P = np.eye(len(L1), dtype=int)[res['col_ind']]
+            P = np.eye(n, dtype=int)[res['col_ind']]
+            P = P[:len(L2), :len(L1)]
             return P
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
