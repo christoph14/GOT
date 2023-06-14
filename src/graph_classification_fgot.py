@@ -95,9 +95,9 @@ if __name__ == '__main__':
     except sqlite3.OperationalError:
         pass
 
-    data = (args.algorithm, args.dataset, args.seed, args.filter, int(accuracy))
-    cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?, ?) "
-                "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy;", data)
+    data = (args.algorithm, args.dataset, args.seed, args.filter, int(accuracy), time() - t0)
+    cur.execute("INSERT INTO classification VALUES (?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT DO UPDATE SET accuracy=excluded.accuracy, time=excluded.time;", data)
     con.commit()
     cur.close()
     con.close()
