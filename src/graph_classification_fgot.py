@@ -11,7 +11,7 @@ import networkx as nx
 import numpy as np
 
 from utils.dataset import tud_to_networkx
-from utils.strategies import get_strategy
+from utils.strategies import get_strategy, get_filters
 
 
 def compute_distance(G1, G2, strategy, strategy_args):
@@ -19,7 +19,10 @@ def compute_distance(G1, G2, strategy, strategy_args):
     L1 = nx.laplacian_matrix(G1).todense()
     L2 = nx.laplacian_matrix(G2).todense()
     P = strategy(L1, L2)
-    distance = np.linalg.norm(L1 - P.T @ L2 @ P, ord='fro')
+    # distance = np.linalg.norm(L1 - P.T @ L2 @ P, ord='fro')
+    gL1 = get_filters(L1, strategy_args['filter_name'])
+    gL2 = get_filters(L2, strategy_args['filter_name'])
+    distance = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
     return distance
 
 if __name__ == '__main__':
