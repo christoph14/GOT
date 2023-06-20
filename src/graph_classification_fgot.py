@@ -45,7 +45,9 @@ if __name__ == '__main__':
 
     # Load graph data set
     graphs = tud_to_networkx(args.dataset)
-    X = rng.choice(graphs, args.n_graphs)
+    X = np.empty(len(graphs), dtype=object)
+    X[:] = graphs
+    X = rng.choice(X, args.n_graphs)
     y = np.array([G.graph['classes'] for G in X])
     print(f"Dataset: {args.dataset}")
     print(f'Compute distance matrix for {args.n_graphs} graphs')
