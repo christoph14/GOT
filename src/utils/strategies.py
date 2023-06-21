@@ -6,7 +6,7 @@ import scipy.linalg as slg
 from scipy.optimize import quadratic_assignment
 import torch
 
-from alignment import got_strategy, gw_entropic, ipfp
+from alignment import got_strategy, gw_entropic, gw_strategy, ipfp
 from alignment._filter_graph_optimal_transport import PstoH, P_nv2, find_trace_sink_wass_filters_reg
 from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
