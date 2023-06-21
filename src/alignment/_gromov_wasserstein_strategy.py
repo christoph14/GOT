@@ -24,15 +24,11 @@ def gw_strategy(L1, L2):
     G2 = graph_from_laplacian(L2)
     C2 = nx.floyd_warshall_numpy(G2)
 
-    n = nx.number_of_nodes(G1)
-    if nx.number_of_nodes(G2) != n:
-        raise ValueError("G1 and G2 should have the same number of nodes.")
-
     p = ot.unif(len(C1))
     q = ot.unif(len(C2))
 
     T = ot.gromov_wasserstein(C1, C2, p, q, log=False)
-    T = T.T * n
+    T = T.T
 
     return T
 

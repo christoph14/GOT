@@ -53,11 +53,9 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return T
     elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
-            T = gw_entropic(L1, L2)
+            T = gw_strategy(L1, L2)
             if scale:
-                if not len(L1) == len(L2):
-                    raise ValueError("If scale is True, both graphs must have the same size.")
-                T *= len(L1)
+                T *= np.sqrt(len(L1) * len(L2))
             return T
     elif strategy_name.lower() == 'rrmw':
         # Reweighted Random Walks for Graph Matching
