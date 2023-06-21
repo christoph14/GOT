@@ -49,9 +49,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
                 L1, L2, epsilon, filter_name, tau, epochs
             ).T
             if scale:
-                if not len(L1) == len(L2):
-                    raise ValueError("If scale is True, both graphs must have the same size.")
-                T *= len(L1)
+                T *= np.sqrt(len(L1) * len(L2))
             return T
     elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
