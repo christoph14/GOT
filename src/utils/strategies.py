@@ -117,6 +117,28 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             P = np.eye(n, dtype=int)[res['col_ind']]
             P = P[:len(L2), :len(L1)]
             return P
+    elif strategy_name.lower().startswith('blowup-qap'):
+        if len(strategy_name.split("-")) > 2:
+            if filter_name is not None:
+                print('The given filter is not used because it is specified by the algo name.')
+            filter_name = strategy_name.split("-")[2]
+        def strategy(L1, L2):
+            import math
+            n = math.lcm(len(L1), len(L2))
+            L1_ = np.zeros((n,n))
+            L2_ = np.zeros((n,n))
+            for i in range(round(n / len(L1))):
+                L1_[i * len(L1): (i+1) * len(L1), i * len(L1): (i+1) * len(L1)] = L1
+            for i in range(round(n / len(L2))):
+                L2_[i * len(L2): (i+1) * len(L2), i * len(L2): (i+1) * len(L2)] = L2
+            g1, g2 = get_filters(L1_, filter_name), get_filters(L2_, filter_name)
+            res = quadratic_assignment(g2.T, g1, method='2opt', options={'maximize': True})
+            P_blowup = np.eye(n, dtype=int)[res['col_ind']]
+            P = np.zeros((len(L2), len(L1)))
+            for i in range(n):
+                for j in range(n):
+                    P[i % len(L2), j % len(L1)] += P_blowup[i,j]
+            return P
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
             rng = np.random.default_rng(seed)
