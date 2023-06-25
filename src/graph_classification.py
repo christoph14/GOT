@@ -134,6 +134,7 @@ print(confusion_matrix(y, y_pred))
 print('Correct classifications:', accuracy)
 ConfusionMatrixDisplay.from_predictions(y, y_pred, colorbar=False)
 plt.title(f'{args.strategy}: {accuracy}/{len(graphs)}')
+plt.tight_layout()
 plt.savefig(f'../plots/confusion_matrix_{args.strategy}_{args.seed}.pdf', bbox_inches='tight')
 plt.show()
 
