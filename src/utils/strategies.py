@@ -134,6 +134,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             for i in range(n):
                 for j in range(n):
                     P[i % len(L2), j % len(L1)] += P_blowup[i,j]
+            P = P / n * np.sqrt(len(L1) * len(L2))
             return P
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
