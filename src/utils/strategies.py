@@ -4,7 +4,6 @@ import ot
 import pygmtools as pygm
 import scipy.linalg as slg
 from scipy.optimize import quadratic_assignment
-import torch
 
 from alignment import got_strategy, gw_entropic, gw_strategy, ipfp
 from alignment._filter_graph_optimal_transport import PstoH, P_nv2, find_trace_sink_wass_filters_reg
@@ -12,7 +11,6 @@ from fGOT import fgot_mgd
 from fGOT.got_nips import find_permutation
 from utils.help_functions import graph_from_laplacian
 
-torch.set_default_tensor_type('torch.DoubleTensor')
 pygm.BACKEND = 'numpy'
 
 
@@ -112,6 +110,34 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             res = quadratic_assignment(g2.T, g1, method='2opt', options={'maximize': True})
             P = np.eye(n, dtype=int)[res['col_ind']]
             P = P[:len(L2), :len(L1)]
+            return P
+    elif strategy_name.lower().startswith('slsqp'):
+        if len(strategy_name.split("-")) > 1:
+            if filter_name is not None:
+                print('The given filter is not used because it is specified by the algo name.')
+            filter_name = strategy_name.split("-")[1]
+        def strategy(L1, L2):
+            from scipy.optimize import minimize
+
+            n1 = len(L1)
+            n2 = len(L2)
+            g1, g2 = get_filters(L1, filter_name), get_filters(L2, filter_name)
+            K = np.kron(g2, g1)
+
+            def objective_function(x):
+                return - (x.reshape(1, -1) @ K @ x.reshape(-1, 1)).item()
+
+            x0 = np.eye(n2, n1).flatten()
+
+            bounds = [(0, None) for _ in range(x0.size)]
+
+            constraints = [
+                {'type': 'eq', 'fun': lambda x: x.reshape(n2, n1) @ np.ones(n1) - np.sqrt(n1 * n2) / n2},
+                {'type': 'eq', 'fun': lambda x: x.reshape(n2, n1).T @ np.ones(n2) - np.sqrt(n1 * n2) / n1}
+            ]
+
+            res = minimize(objective_function, x0, method='SLSQP', bounds=bounds, constraints=constraints)
+            P = res['x'].reshape(n2, n1)
             return P
     elif strategy_name.lower().startswith('blowup-qap'):
         if len(strategy_name.split("-")) > 2:
