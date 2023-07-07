@@ -108,6 +108,5 @@ if __name__ == '__main__':
 
     # Save distance matrix
     np.savetxt(f'{args.path}/distances/{args.dataset}/{args.algorithm}-{args.filter}#{args.seed}.csv', distances)
-    print(distances)
 
     print(f'Completed task in {time() - t0:.0f}s')
