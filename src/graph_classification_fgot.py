@@ -84,6 +84,7 @@ if __name__ == '__main__':
 
     # Save results in database
     os.makedirs(args.path, exist_ok=True)
+    os.makedirs(f"{args.path}/distances/{args.dataset}", exist_ok=True)
     con = sqlite3.connect(f'{args.path}/results_fgot.db', timeout=60)
     cur = con.cursor()
     try:
@@ -104,4 +105,9 @@ if __name__ == '__main__':
     con.commit()
     cur.close()
     con.close()
+
+    # Save distance matrix
+    np.savetxt(f'{args.path}/distances/{args.dataset}/{args.algorithm}-{args.filter}#{args.seed}.csv', distances)
+    print(distances)
+
     print(f'Completed task in {time() - t0:.0f}s')
