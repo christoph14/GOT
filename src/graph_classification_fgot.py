@@ -38,7 +38,6 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default=None)
     parser.add_argument('--epsilon', type=float, default=0.006)
     parser.add_argument('--epochs', type=int, default=1000)
-    parser.add_argument('--scale', action='store_const', const=True, default=False, help='scale soft assignment')
     args = parser.parse_args()
 
     rng = np.random.default_rng(args.seed)
@@ -65,7 +64,7 @@ if __name__ == '__main__':
         'filter_name': args.filter,
         'epsilon': args.epsilon,
         'epochs': args.epochs,
-        'scale': args.scale,
+        'scale': True,
     }
     f = functools.partial(compute_distance, strategy=args.algorithm, strategy_args=strategy_args)
     with multiprocessing.Pool(number_of_cores) as pool:
