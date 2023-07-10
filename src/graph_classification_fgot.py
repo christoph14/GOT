@@ -46,11 +46,12 @@ if __name__ == '__main__':
     graphs = tud_to_networkx(args.dataset)
     X = np.empty(len(graphs), dtype=object)
     X[:] = graphs
-    X = rng.choice(X, args.n_graphs)
+    n_graphs = min(args.n_graphs, len(X))
+    X = rng.choice(X, n_graphs, replace=False)
     y = np.array([G.graph['classes'] for G in X])
     print(f"Dataset: {args.dataset}")
     print(f"Strategy: {args.algorithm}")
-    print(f'Compute distance matrix for {args.n_graphs} graphs')
+    print(f'Compute distance matrix for {n_graphs} graphs')
 
     # Determine number of cores
     if 'SLURM_CPUS_PER_TASK' in os.environ:
