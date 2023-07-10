@@ -91,9 +91,10 @@ if __name__ == '__main__':
         cur.execute('''CREATE TABLE classification (
                            STRATEGY TEXT NOT NULL,
                            DATA TEXT NOT NULL,
-                           SEED TEXT NOT NULL,
+                           SEED INTEGER NOT NULL,
                            FILTER TEXT,
                            ACCURACY REAL,
+                           TIME REAL,
                            unique (STRATEGY, DATA, SEED, FILTER)
                        )''')
     except sqlite3.OperationalError:
