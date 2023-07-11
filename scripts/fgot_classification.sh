@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=fgot
-#SBATCH --output=../log_slurm/fgot_classification_%A.log
+#SBATCH --output=../log_slurm/fgot_classification_%A_%a.log
+#SBATCH --array=0-29
 #SBATCH --time=06:00:00
 #SBATCH --partition=c18m
 #SBATCH --account=thes1398
@@ -15,4 +16,4 @@ conda activate graph
 
 cd ~/GOT/src || exit
 
-python -u create_distance_matrix.py fGOT MUTAG --filter got --epsilon 0.004
+python -u graph_classification_fgot.py "$SLURM_ARRAY_TASK_ID" IPFP ENZYMES
