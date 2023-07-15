@@ -15,4 +15,4 @@ conda activate graph
 
 cd ~/GOT/src || exit
 
-python -u evaluate_params.py fGOT MUTAG --filter got
+python -u evaluate_params.py MUTAG --filter got
