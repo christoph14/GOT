@@ -1,15 +1,14 @@
 import argparse
 import functools
 import itertools
+import json
 import multiprocessing
 import os
 from time import time
 
 import networkx as nx
 import numpy as np
-import pandas as pd
-from sklearn.model_selection import KFold
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import KFold, ParameterGrid
 from sklearn.svm import SVC
 
 from utils.dataset import tud_to_networkx
@@ -62,48 +61,55 @@ if __name__ == '__main__':
         'filter_name': args.filter,
         'scale': True,
     }
-    parameters = np.round(np.arange(0.004, 0.021, 0.001), 4)
-    classifiers = {
-        '1NN': KNeighborsClassifier(n_neighbors=1, metric='precomputed'),
-        '5NN': KNeighborsClassifier(n_neighbors=5, metric='precomputed'),
-        '10NN': KNeighborsClassifier(n_neighbors=10, metric='precomputed'),
-    }
-    for C in 10. ** np.arange(-3, 4):
-        classifiers[f'SVM-{C}'] = SVC(kernel='precomputed', C=C, max_iter=100000)
+    epsilon_range = np.logspace(-3, 3, 7)
 
-    scores = pd.DataFrame(index=np.array(classifiers.keys()))
-    for epsilon in parameters:
+    scores = dict()
+    for epsilon in epsilon_range:
+        # Compute distance matrix
         strategy_args['epsilon'] = epsilon
         f = functools.partial(compute_distance, strategy='fGOT', strategy_args=strategy_args)
         with multiprocessing.Pool(number_of_cores) as pool:
             result = pool.starmap(f, itertools.product(X, X))
         distances = np.reshape(result, (len(X), len(X)))
-        gamma = 0.2
-        K = np.exp(-gamma * distances)
-        distances -= np.min(distances)
 
+        # Check computed distance matrix
         number_errors = np.count_nonzero(np.isnan(distances))
         number_errors += np.count_nonzero(np.isinf(distances))
         if number_errors > 0:
             print(f'Warning: {number_errors} NaNs/infs in distance matrix')
-            scores[epsilon] = np.zeros(len(classifiers))
+            scores[epsilon] = 0
             continue
-
         distances -= np.min(distances)
 
-        score = np.zeros((5, len(classifiers)))
-        for i, (train, test) in enumerate(KFold(n_splits=5, shuffle=True, random_state=args.seed).split(distances)):
-            X_train = distances[train][:, train]
-            X_test = distances[test][:, train]
-            y_train = y[train]
-            y_test = y[test]
-            for j, (name, clf) in enumerate(classifiers.items()):
-                if "SVM" in name:
-                    X_train = K[train][:, train]
-                    X_test = K[test][:, train]
+        C_range = np.logspace(-3, 3, 7)
+        gamma_range = np.logspace(-9, 3, 13)
+        gamma_range = np.concatenate((gamma_range, [0.2]))
+        grid = ParameterGrid({'C': C_range, 'gamma': gamma_range})
+        result = dict()
+        result['param_C'] = []
+        result['param_gamma'] = []
+        result['mean_test_score'] = []
+        for params in grid:
+            C = params['C']
+            gamma = params['gamma']
+            result['param_C'].append(C)
+            result['param_gamma'].append(gamma)
+            clf = SVC(kernel='precomputed', C=C, max_iter=100000)
+            K = np.exp(-gamma * distances)
+
+            kfold = KFold(n_splits=5, shuffle=True, random_state=args.seed)
+            kfold_score = []
+            for i, (train, test) in enumerate(kfold.split(distances)):
+                X_train = K[train][:, train]
+                X_test = K[test][:, train]
+                y_train = y[train]
+                y_test = y[test]
                 clf.fit(X_train, y_train)
-                score[i, j] = clf.score(X_test, y_test)
-        scores[epsilon] = np.mean(score, axis=0)
+                kfold_score.append(clf.score(X_test, y_test))
+            result['mean_test_score'].append(np.mean(kfold_score))
+        scores[epsilon] = np.max(result['mean_test_score'])
+        print(np.max(result['mean_test_score']))
         print(f'epsilon={epsilon} done')
     print(time() - t0)
-    scores.to_csv(f'../param_evaluation_{args.dataset}#{args.filter}.csv')
+    with open(f'../svm_param_evaluation_{args.dataset}#{args.filter}.csv', 'w') as f:
+        json.dump(scores, f, indent=4)
