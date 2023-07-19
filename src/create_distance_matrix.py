@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('algorithm', type=str, help='the alignment algorithm')
     parser.add_argument('dataset', type=str, help='the benchmark data set')
     parser.add_argument('--seed', type=int, default=None, help='the used random seed')
-    parser.add_argument('--path', type=str, default='../matrices/', help='the path to store the output files')
+    parser.add_argument('--path', type=str, default='../distances/', help='the path to store the output files')
     # fGOT arguments
     parser.add_argument('--filter', type=str, default='got')
     parser.add_argument('--epsilon', type=float, default=0.006)
