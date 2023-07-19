@@ -16,6 +16,6 @@ conda activate graph
 cd ../src || exit
 
 for epsilon in 0.003 0.006 0.009 0.015 0.03; do
-    python -u create_distance_matrix.py fGOT "$1" --filter "$2" --epsilon $epsilon &
+    srun --exclusive --ntasks=1 --nodes=1 --cpus-per-task="$SLURM_CPUS_PER_TASK" python -u create_distance_matrix.py fGOT "$1" --filter "$2" --epsilon $epsilon &
 done
 wait
