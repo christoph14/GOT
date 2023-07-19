@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     # Save distance matrix and labels
     os.makedirs(f"{args.path}/{args.dataset}", exist_ok=True)
-    np.savetxt(f'{args.path}/{args.dataset}/{args.algorithm}-{args.filter}.csv', distances)
+    np.savetxt(f'{args.path}/{args.dataset}/{args.algorithm}-{args.filter}-{args.epsilon}.csv', distances)
     np.savetxt(f'{args.path}/{args.dataset}/labels.csv', y)
 
     print(f'Completed task in {time() - t0:.0f}s')

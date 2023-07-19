@@ -5,7 +5,7 @@
 #SBATCH --time=06:00:00
 #SBATCH --partition=c18m
 #SBATCH --account=thes1398
-#SBATCH --ntasks=1
+#SBATCH --ntasks=5
 #SBATCH --cpus-per-task=24
 
 export CONDA_ROOT=$HOME/miniconda3
@@ -13,6 +13,9 @@ export CONDA_ROOT=$HOME/miniconda3
 export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate graph
 
-cd ~/GOT/src || exit
+cd ../src || exit
 
-python -u create_distance_matrix.py fGOT MUTAG --filter got --epsilon 0.004
+for epsilon in 0.003 0.006 0.009 0.015 0.03; do
+    python -u create_distance_matrix.py fGOT "$1" --filter "$2" --epsilon $epsilon &
+done
+wait
