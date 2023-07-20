@@ -62,6 +62,8 @@ if __name__ == '__main__':
         'scale': True,
     }
     epsilon_range = np.logspace(-3, 3, 7)
+    epsilon_range = np.append(epsilon_range, 10**(-3) * np.arange(2, 10, 2))
+    epsilon_range = np.append(epsilon_range, 10**(-2) * np.arange(2, 10, 2))
 
     scores = dict()
     for epsilon in epsilon_range:
@@ -107,8 +109,7 @@ if __name__ == '__main__':
                 clf.fit(X_train, y_train)
                 kfold_score.append(clf.score(X_test, y_test))
             result['mean_test_score'].append(np.mean(kfold_score))
-        scores[epsilon] = np.max(result['mean_test_score'])
-        print(np.max(result['mean_test_score']))
+        scores[epsilon] = np.round(np.max(result['mean_test_score']), 5)
         print(f'epsilon={epsilon} done')
     print(time() - t0)
     with open(f'../svm_param_evaluation_{args.dataset}#{args.filter}.csv', 'w') as f:
