@@ -370,7 +370,7 @@ def sinkhorn_knopp(a, b, M, reg, numItermax=1000,
                 or np.any(np.isinf(u)) or np.any(np.isinf(v))):
             # we have reached the machine precision
             # come back to previous solution and quit loop
-            print('Warning: numerical errors at iteration', cpt)
+            warnings.warn(f'Numerical errors at iteration {cpt}.', RuntimeWarning)
             u = uprev
             v = vprev
             break
@@ -757,7 +757,7 @@ def sinkhorn_stabilized(a, b, M, reg, numItermax=1000, tau=1e3, stopThr=1e-9,
         if np.any(np.isnan(u)) or np.any(np.isnan(v)):
             # we have reached the machine precision
             # come back to previous solution and quit loop
-            print('Warning: numerical errors at iteration', cpt)
+            warnings.warn(f'Numerical errors at iteration {cpt}.', RuntimeWarning)
             u = uprev
             v = vprev
             break
