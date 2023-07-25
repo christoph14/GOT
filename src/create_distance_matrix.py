@@ -5,23 +5,10 @@ import multiprocessing
 import os
 from time import time
 
-import networkx as nx
 import numpy as np
 
 from utils.dataset import tud_to_networkx
-from utils.strategies import get_strategy, get_filters
-
-
-def compute_distance(G1, G2, strategy, strategy_args):
-    strategy = get_strategy(strategy, it=10, tau=1, n_samples=30, lr=0.2, **strategy_args)
-    L1 = nx.laplacian_matrix(G1).todense()
-    L2 = nx.laplacian_matrix(G2).todense()
-    P = strategy(L1, L2)
-    gL1 = get_filters(L1, strategy_args['filter_name'])
-    gL2 = get_filters(L2, strategy_args['filter_name'])
-    distance = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
-    return distance
-
+from utils.distances import compute_distance
 
 if __name__ == '__main__':
     t0 = time()
@@ -61,7 +48,7 @@ if __name__ == '__main__':
         'scale': True,
         'seed': args.seed,
     }
-    f = functools.partial(compute_distance, strategy=args.algorithm, strategy_args=strategy_args)
+    f = functools.partial(compute_distance, strategy=args.algorithm, strategy_args=strategy_args, distance='got')
     with multiprocessing.Pool(number_of_cores) as pool:
         result = pool.starmap(f, itertools.product(X, X))
     distances = np.reshape(result, (len(X), len(X)))
