@@ -56,14 +56,16 @@ if __name__ == '__main__':
         number_of_cores = multiprocessing.cpu_count()
     print(f'Use {number_of_cores} cores')
 
-    # Compute and save distances
     strategy_args = {
         'filter_name': args.filter,
         'scale': True,
     }
-    epsilon_range = np.logspace(-3, 3, 7)
-    epsilon_range = np.append(epsilon_range, 10**(-3) * np.arange(2, 10, 2))
-    epsilon_range = np.append(epsilon_range, 10**(-2) * np.arange(2, 10, 2))
+
+    # Define possible values for fGOT regularization parameter
+    epsilon_range = np.append(
+        10**(-3) * np.arange(2, 12, 2),
+        10**(-2) * np.arange(2, 12, 2)
+    )
 
     scores = dict()
     for epsilon in epsilon_range:
@@ -75,13 +77,19 @@ if __name__ == '__main__':
         distances = np.reshape(result, (len(X), len(X)))
 
         # Check computed distance matrix
-        number_errors = np.count_nonzero(np.isnan(distances))
-        number_errors += np.count_nonzero(np.isinf(distances))
-        if number_errors > 0:
-            print(f'Warning: {number_errors} NaNs/infs in distance matrix')
-            scores[epsilon] = 0
-            continue
-        distances -= np.min(distances)
+        n_errors = np.count_nonzero(np.isnan(distances) | np.isinf(distances))
+        if n_errors > 0:
+            print(f'Warning: {n_errors} NaNs/infs in distance matrix.')
+            if (np.isnan(distances) | np.isinf(distances)).all():
+                scores[epsilon] = 0
+                continue
+            else:
+                distances = np.nan_to_num(distances, nan=np.nanmax(distances))
+
+        # Ensure that the distance matrix is non-negative
+        if np.min(distances) < 0:
+            print(f'Warning: negative values in distance matrix.')
+            distances -= np.min(distances)
 
         C_range = np.logspace(-3, 3, 7)
         gamma_range = np.logspace(-9, 3, 13)
@@ -112,5 +120,5 @@ if __name__ == '__main__':
         scores[epsilon] = np.round(np.max(result['mean_test_score']), 5)
         print(f'epsilon={epsilon} done')
     print(time() - t0)
-    with open(f'../svm_param_evaluation_{args.dataset}#{args.filter}.csv', 'w') as f:
+    with open(f'../svm_param_evaluation_{args.dataset}#{args.filter}.json', 'w') as f:
         json.dump(scores, f, indent=4)
