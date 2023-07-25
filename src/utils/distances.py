@@ -6,7 +6,7 @@ from utils.strategies import get_strategy, get_filters
 
 
 def compute_distance(G1, G2, strategy, strategy_args, distance=None):
-    strategy = get_strategy(strategy, it=10, tau=1, n_samples=30, lr=0.2, **strategy_args)
+    strategy = get_strategy(strategy, it=10, tau=1, n_samples=30, lr=0.2, epochs=1000, **strategy_args)
     L1 = nx.laplacian_matrix(G1).todense()
     L2 = nx.laplacian_matrix(G2).todense()
     P = strategy(L1, L2)
