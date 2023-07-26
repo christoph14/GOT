@@ -15,7 +15,9 @@ def compute_distance(G1, G2, strategy, strategy_args, distance=None):
     if (np.isnan(P) | np.isinf(P)).any():
         return np.nan
     if distance == 'got':
-        result = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(slg.sqrtm(gL1 @ P.T @ gL2 @ P))
+        A = gL1 @ gL1
+        B = P.T @ gL2 @ gL2 @ P
+        result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(A @ B))
     elif distance == 'fro':
         result = slg.norm(gL1 - P.T @ gL2 @ P, ord='fro')
         # result = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
@@ -39,7 +41,6 @@ def wasserstein_distance(A, B):
     distance : float
         Calculated Wasserstein distance.
     """
-    root = slg.sqrtm(A)
-    result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(root @ B @ root))
+    result = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(A @ B))
     distance = np.abs(result.real)
     return distance
