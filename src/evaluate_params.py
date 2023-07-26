@@ -107,5 +107,5 @@ if __name__ == '__main__':
         scores[epsilon] = np.round(np.max(result['mean_test_score']), 5)
         print(f'epsilon={epsilon} done')
     print(time() - t0)
-    with open(f'../svm_param_evaluation_{args.dataset}#{args.filter}.json', 'w') as f:
+    with open(f'../svm_param_evaluation_{args.dataset}-{args.filter}.json', 'w') as f:
         json.dump(scores, f, indent=4)
