@@ -12,11 +12,16 @@ def compute_distance(G1, G2, strategy, strategy_args, distance=None):
     P = strategy(L1, L2)
     gL1 = get_filters(L1, strategy_args['filter_name'])
     gL2 = get_filters(L2, strategy_args['filter_name'])
+    if (np.isnan(P) | np.isinf(P)).any():
+        return np.nan
     if distance == 'got':
-        result = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(np.sqrt(gL1 @ P.T @ gL2 @ P))
+        result = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(slg.sqrtm(gL1 @ P.T @ gL2 @ P))
     elif distance == 'fro':
-        result = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
-    return result
+        result = slg.norm(gL1 - P.T @ gL2 @ P, ord='fro')
+        # result = np.trace(gL1**2) + np.trace(gL2**2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
+    else:
+        raise ValueError(f"Invalid distance ´{distance}´.")
+    return result.real
 
 
 def wasserstein_distance(A, B):
