@@ -138,3 +138,5 @@ src/FGW-master/
 plots/
 results.db
 datasets/
+matrices/
+distances/
