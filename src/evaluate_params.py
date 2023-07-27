@@ -43,6 +43,7 @@ if __name__ == '__main__':
         number_of_cores = multiprocessing.cpu_count()
     print(f'Use {number_of_cores} cores')
 
+    distance_measures = ['got', 'got-approx', 'fro']
     strategy_args = {
         'filter_name': args.filter,
         'scale': True,
@@ -58,53 +59,56 @@ if __name__ == '__main__':
     for epsilon in epsilon_range:
         # Compute distance matrix
         strategy_args['epsilon'] = epsilon
-        f = functools.partial(compute_distance, strategy='fGOT', strategy_args=strategy_args, distance='got')
+        f = functools.partial(compute_distance, strategy='fGOT', strategy_args=strategy_args)
         with multiprocessing.Pool(number_of_cores) as pool:
             result = pool.starmap(f, itertools.product(X, X))
-        distances = np.reshape(result, (len(X), len(X)))
+        # Convert list of dicts to dict of lists, and reshape distance matrices
+        all_distances = {k: np.reshape([dic[k] for dic in result], (len(X), len(X))) for k in distance_measures}
 
-        # Check computed distance matrix
-        n_errors = np.count_nonzero(np.isnan(distances) | np.isinf(distances))
-        if n_errors > 0:
-            print(f'Warning: {n_errors} NaNs/infs in distance matrix.')
-            if (np.isnan(distances) | np.isinf(distances)).all():
-                scores[epsilon] = 0
-                continue
-            else:
-                distances = np.nan_to_num(distances, nan=np.nanmax(distances))
+        scores[epsilon] = {}
+        for measure, distances in all_distances.items():
+            # Check computed distance matrix
+            n_errors = np.count_nonzero(np.isnan(distances) | np.isinf(distances))
+            if n_errors > 0:
+                print(f'Warning: {n_errors} NaNs/infs in distance matrix.')
+                if (np.isnan(distances) | np.isinf(distances)).all():
+                    scores[epsilon][measure] = 0
+                    continue
+                else:
+                    distances = np.nan_to_num(distances, nan=np.nanmax(distances))
 
-        # Ensure that the distance matrix is non-negative
-        if np.min(distances) < 0:
-            print(f'Warning: negative values in distance matrix.')
-            distances -= np.min(distances)
+            # Ensure that the distance matrix is non-negative
+            if np.min(distances) < 0:
+                print(f'Warning: negative values in {measure} distance matrix.')
+                distances -= np.min(distances)
 
-        C_range = np.logspace(-3, 3, 7)
-        gamma_range = np.logspace(-9, 3, 13)
-        gamma_range = np.concatenate((gamma_range, [0.2]))
-        grid = ParameterGrid({'C': C_range, 'gamma': gamma_range})
-        result = dict()
-        result['param_C'] = []
-        result['param_gamma'] = []
-        result['mean_test_score'] = []
-        for params in grid:
-            C = params['C']
-            gamma = params['gamma']
-            result['param_C'].append(C)
-            result['param_gamma'].append(gamma)
-            clf = SVC(kernel='precomputed', C=C, max_iter=100000)
-            K = np.exp(-gamma * distances)
+            C_range = np.logspace(-3, 3, 7)
+            gamma_range = np.logspace(-9, 3, 13)
+            gamma_range = np.concatenate((gamma_range, [0.2]))
+            grid = ParameterGrid({'C': C_range, 'gamma': gamma_range})
+            result = dict()
+            result['param_C'] = []
+            result['param_gamma'] = []
+            result['mean_test_score'] = []
+            for params in grid:
+                C = params['C']
+                gamma = params['gamma']
+                result['param_C'].append(C)
+                result['param_gamma'].append(gamma)
+                clf = SVC(kernel='precomputed', C=C, max_iter=100000)
+                K = np.exp(-gamma * distances)
 
-            kfold = KFold(n_splits=5, shuffle=True, random_state=args.seed)
-            kfold_score = []
-            for i, (train, test) in enumerate(kfold.split(distances)):
-                X_train = K[train][:, train]
-                X_test = K[test][:, train]
-                y_train = y[train]
-                y_test = y[test]
-                clf.fit(X_train, y_train)
-                kfold_score.append(clf.score(X_test, y_test))
-            result['mean_test_score'].append(np.mean(kfold_score))
-        scores[epsilon] = np.round(np.max(result['mean_test_score']), 5)
+                kfold = KFold(n_splits=5, shuffle=True, random_state=args.seed)
+                kfold_score = []
+                for i, (train, test) in enumerate(kfold.split(distances)):
+                    X_train = K[train][:, train]
+                    X_test = K[test][:, train]
+                    y_train = y[train]
+                    y_test = y[test]
+                    clf.fit(X_train, y_train)
+                    kfold_score.append(clf.score(X_test, y_test))
+                result['mean_test_score'].append(np.mean(kfold_score))
+            scores[epsilon][measure] = np.round(np.max(result['mean_test_score']), 5)
         print(f'epsilon={epsilon} done')
     print(time() - t0)
     with open(f'../svm_param_evaluation_{args.dataset}-{args.filter}.json', 'w') as f:
