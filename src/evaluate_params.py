@@ -33,7 +33,7 @@ if __name__ == '__main__':
     n_graphs = min(args.n_graphs, len(X))
     X = rng.choice(X, n_graphs, replace=False)
     y = np.array([G.graph['classes'] for G in X])
-    print(f"Evaluate parameters on data set {args.dataset}")
+    print(f"Evaluate parameters on data set {args.dataset} with filter {args.filter}.")
     print(f'Compute distance matrix for {n_graphs} graphs')
 
     # Determine number of cores
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         number_of_cores = multiprocessing.cpu_count()
     print(f'Use {number_of_cores} cores')
 
-    distance_measures = ['got', 'got-approx', 'fro']
+    distance_measures = ['got', 'got-approx', 'fro', 'got-label']
     strategy_args = {
         'filter_name': args.filter,
         'scale': True,
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             if n_errors > 0:
                 print(f'Warning: {n_errors} NaNs/infs in distance matrix.')
                 if (np.isnan(distances) | np.isinf(distances)).all():
-                    scores[epsilon][measure] = 0
+                    scores[epsilon][measure] = 0, np.inf
                     continue
                 else:
                     distances = np.nan_to_num(distances, nan=np.nanmax(distances))
@@ -108,7 +108,7 @@ if __name__ == '__main__':
                     clf.fit(X_train, y_train)
                     kfold_score.append(clf.score(X_test, y_test))
                 result['mean_test_score'].append(np.mean(kfold_score))
-            scores[epsilon][measure] = np.round(np.max(result['mean_test_score']), 5)
+            scores[epsilon][measure] = np.round(np.max(result['mean_test_score']), 5), np.sum(distances)
         print(f'epsilon={epsilon} done')
     print(time() - t0)
     with open(f'../svm_param_evaluation_{args.dataset}-{args.filter}.json', 'w') as f:
