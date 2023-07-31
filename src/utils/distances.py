@@ -18,7 +18,7 @@ def compute_distance(G1, G2, strategy, strategy_args):
     if (np.isnan(P) | np.isinf(P)).any():
         return {
             'got': np.nan, 'got-label': np.nan,
-            'got-approx': np.nan, 'got-approx-label': np.nan,
+            'approx': np.nan, 'approx-label': np.nan,
             'fro': np.nan, 'fro-label': np.nan,
         }
 
@@ -30,8 +30,8 @@ def compute_distance(G1, G2, strategy, strategy_args):
     result['got'] = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(A @ B)).real
     result['got-label'] = result['got'] + slg.norm(m1 - P.T @ m2)**2
     # Add approximated Wasserstein distance
-    result['got-approx'] = np.trace(gL1 @ gL1) + np.trace(gL2 @ gL2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
-    result['got-approx-label'] = result['got-approx'] + slg.norm(m1 - P.T @ m2)**2
+    result['approx'] = np.trace(gL1 @ gL1) + np.trace(gL2 @ gL2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
+    result['approx-label'] = result['approx'] + slg.norm(m1 - P.T @ m2)**2
     # Add Frobenius norm
     result['fro'] = slg.norm(gL1 - P.T @ gL2 @ P, ord='fro')
     result['fro-label'] = result['fro'] + slg.norm(m1 - P.T @ m2)**2
