@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=fgot
-#SBATCH --output=../log_slurm/fgot_classification_%A.log
-#SBATCH --time=06:00:00
+#SBATCH --output=../log_slurm/fgot_distances_%A.log
+#SBATCH --time=12:00:00
 #SBATCH --partition=c18m
 #SBATCH --account=thes1398
 #SBATCH --ntasks=10
