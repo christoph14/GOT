@@ -2,18 +2,6 @@ import numpy as np
 from sklearn import clone
 
 
-def cross_val_score(estimator, X, y, scoring, cv):
-    scores = []
-    for i, (train, test) in enumerate(cv.split(X)):
-        X_train = X[train][:, train]
-        X_test = X[test][:, train]
-        y_train = y[train]
-        y_test = y[test]
-        estimator.fit(X_train, y_train)
-        scores.append(estimator.score(X_test, y_test))
-    return np.array(scoring)
-
-
 def grid_search(X, y, estimator, grid, cv):
     result = {'mean_test_score': []}
     distances = np.array(X)
