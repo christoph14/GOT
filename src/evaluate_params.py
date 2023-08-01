@@ -13,6 +13,7 @@ from sklearn.svm import SVC
 from utils.dataset import tud_to_networkx
 from utils.distances import compute_distance
 
+
 if __name__ == '__main__':
     t0 = time()
     # Parse arguments
@@ -61,7 +62,7 @@ if __name__ == '__main__':
         strategy_args['epsilon'] = epsilon
         f = functools.partial(compute_distance, strategy='fGOT', strategy_args=strategy_args)
         with multiprocessing.Pool(number_of_cores) as pool:
-            result = pool.starmap(f, itertools.product(X, X))
+            result = pool.map(f, itertools.product(X, X))
         # Convert list of dicts to dict of lists, and reshape distance matrices
         all_distances = {k: np.reshape([dic[k] for dic in result], (len(X), len(X))) for k in distance_measures}
 

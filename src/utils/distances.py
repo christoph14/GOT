@@ -5,7 +5,8 @@ import scipy.linalg as slg
 from utils.strategies import get_strategy, get_filters
 
 
-def compute_distance(G1, G2, strategy, strategy_args):
+def compute_distance(graphs, strategy, strategy_args):
+    G1, G2 = graphs
     # Compute alignment
     strategy = get_strategy(strategy, it=10, tau=1, n_samples=30, lr=0.2, epochs=1000, **strategy_args)
     L1 = nx.laplacian_matrix(G1).todense()

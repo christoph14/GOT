@@ -1,3 +1,5 @@
+"""Compute the fGOT alignments and different distance measures."""
+
 import argparse
 import functools
 import itertools
@@ -7,9 +9,11 @@ import os
 from time import time
 
 import numpy as np
+from tqdm import tqdm
 
 from utils.dataset import tud_to_networkx
 from utils.distances import compute_distance
+
 
 if __name__ == '__main__':
     # Parse arguments
@@ -55,7 +59,7 @@ if __name__ == '__main__':
     f = functools.partial(compute_distance, strategy=args.algorithm, strategy_args=strategy_args)
     t0 = time()
     with multiprocessing.Pool(number_of_cores) as pool:
-        result = pool.starmap(f, itertools.product(X, X))
+        result = list(tqdm(pool.imap(f, itertools.product(X, X)), total=len(X)*len(X)))
     computing_time = time() - t0
     all_distances = {k: np.reshape([dic[k] for dic in result], (len(X), len(X))) for k in distance_measures}
 
