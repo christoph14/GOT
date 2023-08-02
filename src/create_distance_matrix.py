@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('dataset', type=str, help='the benchmark data set')
     parser.add_argument('--seed', type=int, default=None, help='the used random seed')
     parser.add_argument('--path', type=str, default='../distances/', help='the path to store the output files')
+    parser.add_argument('--max_graphs', type=int, default=None, help='the maximum number of graphs.')
     # fGOT arguments
     parser.add_argument('--filter', type=str, default='got')
     parser.add_argument('--epsilon', type=float, default=0.006)
@@ -32,11 +33,14 @@ if __name__ == '__main__':
     graphs = tud_to_networkx(args.dataset)
     X = np.empty(len(graphs), dtype=object)
     X[:] = graphs
+    if args.max_graphs is not None and args.max_graphs < len(graphs):
+        rng = np.random.default_rng(args.seed)
+        X = rng.choice(X, args.max_graphs, replace=False)
     y = np.array([G.graph['classes'] for G in X])
     print(f"Dataset: {args.dataset}")
     print(f"Strategy: {args.algorithm} with filter {args.filter} and epsilon={args.epsilon}")
     print(f"Seed: {args.seed}")
-    print(f'Compute distance matrix for {len(graphs)} graphs')
+    print(f'Compute distance matrix for {len(X)} graphs')
 
     # Determine number of cores
     if 'SLURM_CPUS_PER_TASK' in os.environ:
