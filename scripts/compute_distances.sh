@@ -18,4 +18,4 @@ cd ../src || exit
 
 epsilon_range=(0.002 0.004 0.006 0.008 0.01 0.02 0.04 0.06 0.08 0.1)
 
-srun --exclusive --ntasks=1 --nodes=1 --cpus-per-task="$SLURM_CPUS_PER_TASK" python -u create_distance_matrix.py fGOT "$1" --filter "$2" --epsilon ${epsilon_range[$SLURM_ARRAY_TASK_ID]}
+srun --exclusive --ntasks=1 --nodes=1 --cpus-per-task="$SLURM_CPUS_PER_TASK" python -u create_distance_matrix.py "$1" "$2" --filter "$3" --epsilon ${epsilon_range[$SLURM_ARRAY_TASK_ID]}
