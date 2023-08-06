@@ -5,10 +5,11 @@ from time import time
 
 import networkx as nx
 import numpy as np
+from pygmtools import hungarian
 
 from fGOT.test_generator_helpers import er_generator, permutation_generator
-from utils import check_soft_assignment, check_permutation_matrix
-from utils.strategies import get_strategy
+from utils import check_permutation_matrix
+from utils.strategies import get_strategy, get_filters
 from utils.loss_functions import w2_loss, l2_loss
 
 
@@ -63,22 +64,32 @@ for p in p_values:
 
     # Calculate permutation and different losses for every strategy
     for strategy, name in zip(strategies, strategy_names):
-        # Find permutation
+        # Find alignment
         start_time = time()
         P_estimated = strategy(L1, L2)
         running_time = time() - start_time
         if args.allow_soft_assignment:
-            P_estimated = check_soft_assignment(P_estimated, atol=1e-02)
+            # P_estimated = check_soft_assignment(P_estimated, atol=1e-02)
+            try:
+                P_estimated = hungarian(P_estimated)
+            except ValueError as e:
+                print(P_estimated)
+                raise e
         else:
             P_estimated = check_permutation_matrix(P_estimated, atol=1e-02)
 
         # Calculate and save different loss functions
         w2_error = w2_loss(L1, L2, P_estimated, alpha=args.alpha)
-        l2_error = l2_loss(L1, L2, P_estimated)
+        l2_error = l2_loss(L1, L2, P_estimated)**2
+        gL1 = get_filters(L1, method="got")
+        gL2 = get_filters(L2, method="got")
+        approx_error = np.trace(gL1 @ gL1) + np.trace(gL2 @ gL2) - 2 * np.trace(gL1 @ P_estimated.T @ gL2 @ P_estimated)
         data.append(
             {'strategy' : name,
+             'filter': args.filter,
              'seed' : args.seed,
              'p' : p,
+             'approx_loss' : approx_error,
              'w2_loss' : w2_error,
              'l2_loss' : l2_error,
              'time': running_time,
@@ -94,18 +105,20 @@ cur = con.cursor()
 try:
     cur.execute('''CREATE TABLE alignment (
                        STRATEGY TEXT NOT NULL,
-                       SEED TEXT NOT NULL,
+                       FILTER TEXT NOT NULL,
+                       SEED INT NOT NULL,
                        P REAL NOT NULL,
                        W2_LOSS REAL,
+                       APPROX_LOSS REAL,
                        L2_LOSS REAL,
                        TIME REAL,
-                       unique (STRATEGY, SEED, P)
+                       unique (STRATEGY, FILTER, SEED, P)
                    )''')
 except sqlite3.OperationalError:
     pass
 
-cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss, :time)"
-                " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss, time=excluded.time",
+cur.executemany("INSERT INTO alignment VALUES(:strategy, :filter, :seed, :p, :w2_loss, :approx_loss, :l2_loss, :time)"
+                " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, approx_loss=excluded.approx_loss, l2_loss=excluded.l2_loss, time=excluded.time",
                 data)
 con.commit()
 cur.close()
