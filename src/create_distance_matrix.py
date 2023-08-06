@@ -25,7 +25,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_graphs', type=int, default=None, help='the maximum number of graphs.')
     # fGOT arguments
     parser.add_argument('--filter', type=str, default='got')
-    parser.add_argument('--epsilon', type=float, default=0.006)
+    parser.add_argument('--epsilon', type=float, default=None)
     parser.add_argument('--epochs', type=int, default=1000)
     args = parser.parse_args()
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         X = rng.choice(X, args.max_graphs, replace=False)
     y = np.array([G.graph['classes'] for G in X])
     print(f"Dataset: {args.dataset}")
-    print(f"Strategy: {args.algorithm} with filter {args.filter} and epsilon={args.epsilon}")
+    print(f"Strategy: {args.algorithm} with filter {args.filter}" + f" and epsilon={args.epsilon}" if args.epsilon is not None else "")
     print(f"Seed: {args.seed}")
     print(f'Compute distance matrix for {len(X)} graphs')
 
