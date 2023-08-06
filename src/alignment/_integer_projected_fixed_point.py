@@ -42,14 +42,8 @@ def integer_projected_fixed_point(L1, L2, affinity='default'):
         K = pygm.utils.build_aff_mat(None, edge1, conn1, None, edge2, conn2, [n1], None, [n2], None,
                                      edge_aff_fn=gaussian_aff)
     elif affinity == 'got':
-        # K = np.kron(pinv(L1), pinv(L2))
-        conn1, edge1 = pygm.utils.dense_to_sparse(pinv(L1))
-        conn2, edge2 = pygm.utils.dense_to_sparse(pinv(L2))
-        gaussian_aff = functools.partial(pygm.utils.gaussian_aff_fn, sigma=.1)  # set affinity function
-        K = pygm.utils.build_aff_mat(None, edge1, conn1, None, edge2, conn2, [n1], None, [n2], None,
-                                     edge_aff_fn=gaussian_aff)
+        K = np.kron(pinv(L1), pinv(L2))
     else:
         raise ValueError("'affinity' must be either 'default' or 'got'.")
     X = pygm.ipfp(K, n1, n2)
-    # Hungarian? X = pygm.hungarian(X)
     return X
