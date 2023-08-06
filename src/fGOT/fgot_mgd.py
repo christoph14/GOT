@@ -24,13 +24,16 @@ def fgot_loss(tr1, root1, root2, T):
 
 def fgot(root1, root2, p, q, epsilon, max_iter=300, tol=1e-9, verbose=False, log=False, lapl = True):
 
+    # Convert matrices, root is g(L)
     root1 = np.asarray(root1, dtype=np.float64)
     root2 = np.asarray(root2, dtype=np.float64)
-    
+
+    # Add entropic regularization
     if lapl:
         root1 = root1 - 0.5*np.diag(np.diag(root1))
         root2 = root2 - 0.5*np.diag(np.diag(root2))    
-    
+
+    # Initialize values
     T = np.outer(p, q)   
     tr1 = np.trace(root1 @ root1)
     cpt = 0
