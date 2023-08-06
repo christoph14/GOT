@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     data[f"{args.algorithm}-{args.filter}-{args.epsilon}"] = computing_time
     with open(f'{args.path}/{args.dataset}/time.json', "wt") as file:
-        json.dump(data, file)
+        json.dump(data, file, indent=4)
 
     # Save labels and distances
     np.savetxt(f'{args.path}/{args.dataset}/labels.csv', y)
