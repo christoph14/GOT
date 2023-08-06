@@ -8,6 +8,7 @@ from scipy.optimize import quadratic_assignment
 from alignment import got_strategy, gw_entropic, gw_strategy, ipfp
 from alignment._filter_graph_optimal_transport import PstoH, P_nv2, find_trace_sink_wass_filters_reg
 from fGOT import fgot_mgd
+from fGOT.fgot_stochastic_mgd import fgot_stochastic
 from fGOT.got_nips import find_permutation
 from utils.help_functions import graph_from_laplacian
 
