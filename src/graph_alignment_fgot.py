@@ -67,6 +67,7 @@ for p in p_values:
         # Find alignment
         start_time = time()
         P_estimated = strategy(L1, L2)
+        P_estimated = np.nan_to_num(P_estimated, nan=0.0)
         running_time = time() - start_time
         if args.allow_soft_assignment:
             # P_estimated = check_soft_assignment(P_estimated, atol=1e-02)
