@@ -49,6 +49,20 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             if scale:
                 T *= np.sqrt(len(L1) * len(L2))
             return T
+    elif strategy_name.lower().startswith('stochastic-fgot'):
+        if len(strategy_name.split("-")) > 2:
+            if filter_name is not None:
+                print('The given filter is not used because it is specified by the algo name.')
+            filter_name = strategy_name.lower().split("-")[2]
+
+        def strategy(L1, L2):
+            g1 = get_filters(L1, filter_name)
+            g2 = get_filters(L2, filter_name)
+            lr_scaled = lr * (len(L1) * len(L2)) / (np.max(g1) * np.max(g2))
+            T = fgot_stochastic(g1, g2, it=it, lr=lr_scaled).T
+            if scale:
+                T *= np.sqrt(len(L1) * len(L2))
+            return T
     elif strategy_name.lower() == 'gw':
         def strategy(L1, L2):
             T = gw_strategy(L1, L2)
