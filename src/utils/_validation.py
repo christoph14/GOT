@@ -27,3 +27,19 @@ def check_soft_assignment(P, atol=1e-03):
     if not (P >= 0).all():
         raise ValueError("All entries must be non-negative.")
     return P
+
+
+def check_distance_matrix(distances, log=False):
+    # Check distance matrix
+    n_errors = np.count_nonzero(np.isnan(distances) | np.isinf(distances))
+    if n_errors > 0:
+        if log: print(f'Warning: {n_errors} NaNs/infs in distance matrix.')
+        if (np.isnan(distances) | np.isinf(distances)).all():
+            return np.ones_like(distances)
+    distances = np.nan_to_num(distances, nan=np.nanmax(distances))
+
+    # Ensure that the distance matrix is non-negative
+    if np.min(distances) < 0:
+        if log: print(f'Warning: negative values in distance matrix.')
+        distances -= np.min(distances)
+    return distances
