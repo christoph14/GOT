@@ -80,7 +80,7 @@ for p in p_values:
 
         # Calculate and save different loss functions
         w2_error = w2_loss(L1, L2, P_estimated, alpha=args.alpha)
-        l2_error = l2_loss(L1, L2, P_estimated)**2
+        l2_error = l2_loss(L1, L2, P_estimated)
         gL1 = get_filters(L1, method="got")
         gL2 = get_filters(L2, method="got")
         approx_error = np.trace(gL1 @ gL1) + np.trace(gL2 @ gL2) - 2 * np.trace(gL1 @ P_estimated.T @ gL2 @ P_estimated)
