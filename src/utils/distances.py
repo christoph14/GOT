@@ -28,7 +28,8 @@ def compute_distance(graphs, strategy, strategy_args):
     # Add Wasserstein distance between distributions
     A = gL1 @ gL1
     B = P.T @ gL2 @ P @ P.T @ gL2 @ P
-    result['got'] = np.trace(A) + np.trace(B) - 2 * np.trace(slg.sqrtm(A @ B)).real
+    sqrt, _ = slg.sqrtm(A @ B, disp=False)
+    result['got'] = np.trace(A) + np.trace(B) - 2 * np.trace(sqrt).real
     result['got-label'] = result['got'] + slg.norm(m1 - P.T @ m2)**2
     # Add approximated Wasserstein distance
     result['approx'] = np.trace(gL1 @ gL1) + np.trace(gL2 @ gL2) - 2 * np.trace(gL1 @ P.T @ gL2 @ P)
