@@ -21,6 +21,7 @@ parser.add_argument('seed', type=int, help='the used random seed')
 parser.add_argument('--within_probability', type=float, default=0.7)
 parser.add_argument('--between_probability', type=float, default=0.1)
 parser.add_argument('--graph_size', type=int, default=100)
+parser.add_argument('--add_noise', action='store_const', const=True, default=False, help='variable graph size')
 # GOT parameters
 parser.add_argument('--alpha', type=float, default=0.1, help='the regularization factor')
 parser.add_argument('--it', type=int, default=10, help='number of Sinkhorn iterations')
@@ -57,10 +58,11 @@ rng = np.random.default_rng(seed=args.seed)
 
 p_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 for p in p_values:
+    noise1, noise2 = rng.binomial(4, 0.5, size=2) - 2
     n = int(args.graph_size * p)
-    L2 = nx.laplacian_matrix(er_generator(n, rng)).todense()
-    P_true = permutation_generator(n, seed=args.seed)
-    L1 = P_true @ nx.laplacian_matrix((er_generator(n, rng))).todense() @ P_true.T
+    L2 = nx.laplacian_matrix(er_generator(n+noise1, rng)).todense()
+    P_true = permutation_generator(n+noise2, seed=args.seed)
+    L1 = P_true @ nx.laplacian_matrix((er_generator(n+noise2, rng))).todense() @ P_true.T
 
     # Calculate permutation and different losses for every strategy
     for strategy, name in zip(strategies, strategy_names):
