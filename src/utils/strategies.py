@@ -169,7 +169,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             for i in range(round(n / len(L2))):
                 L2_[i * len(L2): (i+1) * len(L2), i * len(L2): (i+1) * len(L2)] = L2
             g1, g2 = get_filters(L1_, filter_name), get_filters(L2_, filter_name)
-            res = quadratic_assignment(g2.T, g1, method='2opt', options={'maximize': True})
+            res = quadratic_assignment(g2.T, g1, method='faq', options={'maximize': True})
             P_blowup = np.eye(n, dtype=int)[res['col_ind']]
             P = np.zeros((len(L2), len(L1)))
             for i in range(n):
