@@ -77,11 +77,7 @@ for p in p_values:
         running_time = time() - start_time
         if args.allow_soft_assignment:
             # P_estimated = check_soft_assignment(P_estimated, atol=1e-02)
-            try:
-                P_estimated = hungarian(P_estimated)
-            except ValueError as e:
-                print(P_estimated)
-                raise e
+            pass
         else:
             P_estimated = check_permutation_matrix(P_estimated, atol=1e-02)
 
