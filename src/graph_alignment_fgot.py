@@ -60,9 +60,13 @@ p_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 for p in p_values:
     noise1, noise2 = rng.binomial(4, 0.5, size=2) - 2
     n = int(args.graph_size * p)
-    L2 = nx.laplacian_matrix(er_generator(n+noise1, rng)).todense()
-    P_true = permutation_generator(n+noise2, seed=args.seed)
-    L1 = P_true @ nx.laplacian_matrix((er_generator(n+noise2, rng))).todense() @ P_true.T
+    if args.add_noise:
+        n1, n2 = n + noise1, n + noise2
+    else:
+        n1, n2 = n, n
+    L2 = nx.laplacian_matrix(er_generator(n1, rng)).todense()
+    P_true = permutation_generator(n2, seed=args.seed)
+    L1 = P_true @ nx.laplacian_matrix((er_generator(n2, rng))).todense() @ P_true.T
 
     # Calculate permutation and different losses for every strategy
     for strategy, name in zip(strategies, strategy_names):
