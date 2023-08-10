@@ -35,18 +35,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Load graph data set
+    print(f"Dataset: {args.dataset}")
     graphs = tud_to_networkx(args.dataset)
     if args.same_size:
         values, counts = np.unique([G.number_of_nodes() for G in graphs], return_counts=True)
         n_nodes = values[np.argmax(counts)]
         graphs = [G for G in graphs if G.number_of_nodes() == n_nodes]
+        print(f"Use only graphs of size {n_nodes}")
     X = np.empty(len(graphs), dtype=object)
     X[:] = graphs
     if args.max_graphs is not None and args.max_graphs < len(graphs):
         rng = np.random.default_rng(args.seed)
         X = rng.choice(X, args.max_graphs, replace=False)
     y = np.array([G.graph['classes'] for G in X])
-    print(f"Dataset: {args.dataset}")
     epsilon_text = f" and epsilon={args.epsilon}" if args.epsilon is not None else ""
     print(f"Strategy: {args.algorithm} with filter {args.filter}" + epsilon_text)
     print(f"Seed: {args.seed}")
