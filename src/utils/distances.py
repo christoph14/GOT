@@ -11,8 +11,12 @@ def compute_distance(graphs, strategy, strategy_args):
     strategy = get_strategy(strategy, it=10, tau=1, n_samples=30, lr=0.2, epochs=1000, **strategy_args)
     L1 = nx.laplacian_matrix(G1).todense()
     L2 = nx.laplacian_matrix(G2).todense()
-    m1 = np.array([nx.get_node_attributes(G1, 'labels')[v] for v in G1.nodes])
-    m2 = np.array([nx.get_node_attributes(G2, 'labels')[v] for v in G2.nodes])
+    if nx.get_node_attributes(G1, 'labels'):
+        m1 = np.array([nx.get_node_attributes(G1, 'labels')[v] for v in G1.nodes])
+        m2 = np.array([nx.get_node_attributes(G2, 'labels')[v] for v in G2.nodes])
+    else:
+        m1 = np.zeros(G1.number_of_nodes())
+        m2 = np.zeros(G2.number_of_nodes())
     P = strategy(L1, L2)
     gL1 = get_filters(L1, strategy_args['filter_name'])
     gL2 = get_filters(L2, strategy_args['filter_name'])
