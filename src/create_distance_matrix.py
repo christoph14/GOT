@@ -23,6 +23,11 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=None, help='the used random seed')
     parser.add_argument('--path', type=str, default='../distances/', help='the path to store the output files')
     parser.add_argument('--max_graphs', type=int, default=None, help='the maximum number of graphs.')
+    parser.add_argument(
+        '--same_size',
+        action='store_const', const=True, default=False,
+        help='allow soft assignment instead of a permutation matrix'
+    )
     # fGOT arguments
     parser.add_argument('--filter', type=str, default='got')
     parser.add_argument('--epsilon', type=float, default=None)
@@ -31,6 +36,10 @@ if __name__ == '__main__':
 
     # Load graph data set
     graphs = tud_to_networkx(args.dataset)
+    if args.same_size:
+        values, counts = np.unique([G.number_of_nodes() for G in graphs], return_counts=True)
+        n_nodes = values[np.argmax(counts)]
+        graphs = [G for G in graphs if G.number_of_nodes() == n_nodes]
     X = np.empty(len(graphs), dtype=object)
     X[:] = graphs
     if args.max_graphs is not None and args.max_graphs < len(graphs):
