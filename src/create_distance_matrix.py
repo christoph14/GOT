@@ -38,7 +38,8 @@ if __name__ == '__main__':
         X = rng.choice(X, args.max_graphs, replace=False)
     y = np.array([G.graph['classes'] for G in X])
     print(f"Dataset: {args.dataset}")
-    print(f"Strategy: {args.algorithm} with filter {args.filter}" + f" and epsilon={args.epsilon}" if args.epsilon is not None else "")
+    epsilon_text = f" and epsilon={args.epsilon}" if args.epsilon is not None else ""
+    print(f"Strategy: {args.algorithm} with filter {args.filter}" + epsilon_text)
     print(f"Seed: {args.seed}")
     print(f'Compute distance matrix for {len(X)} graphs')
 
