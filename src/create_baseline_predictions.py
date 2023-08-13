@@ -44,8 +44,6 @@ if __name__ == '__main__':
             y_test = y[test_index]
             y_pred = clf.predict(X[test_index])
             accuracy = accuracy_score(y_test, y_pred)
-            # precision = precision_score(y_test, y_pred, average='macro')
-            # recall = recall_score(y_test, y_pred, average='macro')
             fold_accuracies.append(accuracy)
         accuracies.append(np.mean(fold_accuracies ))
     accuracies = np.array(accuracies)
