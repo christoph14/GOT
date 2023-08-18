@@ -111,6 +111,8 @@ for p in p_values:
     data.append(
         {'strategy' : strategy_name,
          'seed' : args.seed,
+         'p_in' : args.within_probability,
+         'p_out' : args.between_probability,
          'p' : p,
          'w2_loss' : w2_error,
          'l2_loss' : l2_error,
@@ -127,17 +129,21 @@ try:
     cur.execute('''CREATE TABLE alignment (
                        STRATEGY TEXT NOT NULL,
                        SEED TEXT NOT NULL,
+                       P_IN REAL NOT NULL,
+                       P_OUT REAL NOT NULL,
                        P REAL NOT NULL,
                        W2_LOSS REAL,
                        L2_LOSS REAL,
                        GW_LOSS REAL,
                        NMI REAL,
-                       unique (STRATEGY, SEED, P)
+                       unique (STRATEGY, SEED, P_IN, P_OUT, P)
                    )''')
 except sqlite3.OperationalError:
     pass
 
-cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p, :w2_loss, :l2_loss, :gw_loss, :nmi)"
+p_in = args.within_probability
+p_out = args.between_probability
+cur.executemany("INSERT INTO alignment VALUES(:strategy, :seed, :p_in, :p_out, :p, :w2_loss, :l2_loss, :gw_loss, :nmi)"
                 "ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, l2_loss=excluded.l2_loss,"
                 "gw_loss=excluded.gw_loss, nmi=excluded.nmi", data)
 con.commit()
