@@ -105,8 +105,13 @@ for p in p_values:
 os.makedirs(args.path, exist_ok=True)
 con = sqlite3.connect(f'{args.path}/results_fgot.db', timeout=60)
 cur = con.cursor()
+
+if args.add_noise:
+    table_name = "alignment_noise"
+else:
+    table_name = "alignment"
 try:
-    cur.execute('''CREATE TABLE alignment (
+    cur.execute(f'''CREATE TABLE {table_name} (
                        STRATEGY TEXT NOT NULL,
                        FILTER TEXT NOT NULL,
                        SEED INT NOT NULL,
@@ -120,7 +125,7 @@ try:
 except sqlite3.OperationalError:
     pass
 
-cur.executemany("INSERT INTO alignment VALUES(:strategy, :filter, :seed, :p, :w2_loss, :approx_loss, :l2_loss, :time)"
+cur.executemany(f"INSERT INTO {table_name} VALUES(:strategy, :filter, :seed, :p, :w2_loss, :approx_loss, :l2_loss, :time)"
                 " ON CONFLICT DO UPDATE SET w2_loss=excluded.w2_loss, approx_loss=excluded.approx_loss, l2_loss=excluded.l2_loss, time=excluded.time",
                 data)
 con.commit()
