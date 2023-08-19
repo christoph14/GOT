@@ -25,5 +25,5 @@ python -u graph_alignment_fgot.py blowup-QAP "$SLURM_ARRAY_TASK_ID" --path ../re
 
 python -u graph_alignment_fgot.py stochastic-fGOT "$SLURM_ARRAY_TASK_ID" --path ../results --allow_soft_assignment --lr 50 --sampling_size 5 --it 10 --tau 1 --filter sq --add_noise
 python -u graph_alignment_fgot.py stochastic-fGOT "$SLURM_ARRAY_TASK_ID" --path ../results --allow_soft_assignment --lr 50 --sampling_size 5 --it 10 --tau 1 --filter got --add_noise
-python -u graph_alignment_fgot.py blowup-QAP "$SLURM_ARRAY_TASK_ID" --path ../results --filter sq --add_noise
-python -u graph_alignment_fgot.py blowup-QAP "$SLURM_ARRAY_TASK_ID" --path ../results --filter got --add_noise
+python -u graph_alignment_fgot.py blowup-QAP "$SLURM_ARRAY_TASK_ID" --path ../results --allow_soft_assignment --filter sq --add_noise
+python -u graph_alignment_fgot.py blowup-QAP "$SLURM_ARRAY_TASK_ID" --path ../results --allow_soft_assignment --filter got --add_noise
