@@ -58,3 +58,4 @@ To evaluate the classification performance, use the following command:
 The command evaluates the performance for each available epsilon value.
 
 ### Comparison with Graph Kernels (Section 4.4)
+For the comparison with graph kernels, follow the instructions in the submodule `graphkernels-review`.
