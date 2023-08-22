@@ -61,12 +61,10 @@ if __name__ == '__main__':
                 kernel='precomputed',
                 max_iter=100000,
                 class_weight='balanced',
-                probability=True,
             )
             grid = ParameterGrid({
                 'C': np.logspace(-3, 3, 7),
-                # 'gamma': np.logspace(-10, 10, 21),
-                'gamma': np.logspace(-3, 3, 7),
+                'gamma': np.logspace(-10, 10, 21),
                 'epsilon': epsilon_range,
             })
             svm_score = nested_cross_validation(distances, y, clf, grid, inner_cv, outer_cv, n_jobs=10)
