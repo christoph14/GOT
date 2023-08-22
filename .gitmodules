@@ -1,0 +1,3 @@
+[submodule "graphkernels-review"]
+	path = graphkernels-review
+	url = https://github.com/christoph14/graphkernels-review.git
