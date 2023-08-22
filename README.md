@@ -55,4 +55,6 @@ To evaluate the classification performance, use the following command:
 
     python src/evaluate_classification.py STRATEGY DATASET --filter FILTER --path distances
 
+The command evaluates the performance for each available epsilon value.
+
 ### Comparison with Graph Kernels (Section 4.4)
