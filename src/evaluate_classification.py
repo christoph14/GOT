@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 from utils.validation import nested_cross_validation
 
+
 if __name__ == '__main__':
     # Parse arguments
     parser = argparse.ArgumentParser(description='Evaluates fGOT parameters on given data set.')
@@ -40,14 +41,19 @@ if __name__ == '__main__':
         print('#################################################')
         print(f"Comparison for distance measure {measure}.")
         # Load distance matrices
-        epsilon_range = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1])
-        # epsilon_range = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 0.06, 0.08, 0.1])
-        # epsilon_range = np.array([0.008, 0.02])
-        # epsilon_range = np.array([None])
-        distances = {
-            epsilon: np.loadtxt(f"{args.path}/{args.dataset}/fGOT-{args.filter}-{epsilon}-{measure}.csv")
-            for epsilon in epsilon_range
-        }
+        epsilon_range = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, None])
+        distances = {}
+        for epsilon in epsilon_range:
+            try:
+                d = np.loadtxt(f"{args.path}/{args.dataset}/{args.strategy}-{args.filter}-{epsilon}-{measure}.csv")
+            except FileNotFoundError:
+                continue
+            distances[epsilon] = d
+        if not distances:
+            raise ValueError("No precomputed distances.")
+        print("Available epsilon values:", list(distances.keys()))
+        if measure == 'fro':
+            distances = {key: value**2 for key, value in distances.items()}
 
         svm_scores = []
         knn_scores = []
