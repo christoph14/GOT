@@ -88,13 +88,13 @@ for p in p_values:
         gL2 = get_filters(L2, method="got")
         approx_error = np.trace(gL1 @ gL1) + np.trace(gL2 @ gL2) - 2 * np.trace(gL1 @ P_estimated.T @ gL2 @ P_estimated)
         data.append(
-            {'strategy' : name,
+            {'strategy': name,
              'filter': args.filter,
-             'seed' : args.seed,
-             'p' : p,
-             'approx_loss' : approx_error,
-             'w2_loss' : w2_error,
-             'l2_loss' : l2_error,
+             'seed': args.seed,
+             'p': p,
+             'approx_loss': approx_error,
+             'w2_loss': w2_error,
+             'l2_loss': l2_error,
              'time': running_time,
             }
         )
