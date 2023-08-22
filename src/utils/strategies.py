@@ -179,11 +179,14 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             return P
     elif strategy_name.lower() == 'random':
         def strategy(L1, L2):
-            rng = np.random.default_rng(seed)
-            n = L1.shape[0]
-            idx = rng.permutation(n)
-            P = np.eye(n)
-            P = P[idx, :]
+            if len(L1) == len(L2):
+                rng = np.random.default_rng(seed)
+                n = L1.shape[0]
+                idx = rng.permutation(n)
+                P = np.eye(n)
+                P = P[idx, :]
+            else:
+                P = np.full((len(L2), len(L1)), 1 / np.sqrt(len(L1)*len(L2)))
             return P
     else:
         raise NotImplementedError(
