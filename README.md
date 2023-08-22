@@ -14,7 +14,7 @@ The repository is structured as follows:
  - The `notebooks` folder contains Jupyter notebooks that are mainly used for plotting results.
  - The `scripts` folder contains bash scripts that are used to execute multiple experiments on a Slurm server.
  - The `src` folder contains the main code.
- - The `graphkernels-review` is a submodule that is forked from [graphkernels-review](https://github.com/BorgwardtLab/graphkernels-review). To install the requirements for this submodule, follow the instructions in the `graphkernels-review` readme. The code requires the `graphkernels` package, which is difficult to install on Windows.
+ - The `graphkernels-review` is a submodule that is forked from [graphkernels-review](https://github.com/BorgwardtLab/graphkernels-review). To install the requirements for this submodule, follow the instructions in the `graphkernels-review` readme. The code requires the `graphkernels` package, which is difficult to install on Windows and might cause problems. Hence, the requirements are not contained in the main repository.
 
 ## Run Experiments
 Most of the experiments use the following arguments:
