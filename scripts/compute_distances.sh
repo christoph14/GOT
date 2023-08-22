@@ -4,8 +4,6 @@
 #SBATCH --output=../log_slurm/fgot_distances_%A_%a.log
 #SBATCH --array=0-9
 #SBATCH --time=12:00:00
-#SBATCH --partition=c18m
-#SBATCH --account=thes1398
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
 

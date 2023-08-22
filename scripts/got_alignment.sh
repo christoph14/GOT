@@ -4,8 +4,6 @@
 #SBATCH --output=../log_slurm/got_alignment_%A_%a.log
 #SBATCH --array=1-25
 #SBATCH --time=24:00:00
-#SBATCH --partition=c18m
-#SBATCH --account=thes1398
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 

@@ -4,8 +4,6 @@
 #SBATCH --output=../log_slurm/got_classification_%A_%a.log
 #SBATCH --array=0-24
 #SBATCH --time=06:00:00
-#SBATCH --partition=c18m
-#SBATCH --account=thes1398
 #SBATCH --ntasks=6
 #SBATCH --cpus-per-task=1
 
