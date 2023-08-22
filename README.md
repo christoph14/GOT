@@ -45,6 +45,8 @@ To run the QAP alignment experiments with varying graph sizes (Section 4.2), use
 For the first two alignment tasks, we use the Hungarian method to ensure that the computed alignment is a permutation matrix. This allows for a fair comparison of the strategies since different types of alignments might achieve better results. However, it changes the computed alignment (especially of the fGOT algorithm). If this is not desired, use the argument `--allow_soft_assignment`. If `--add_noise` is used, soft alignments are automatically allowed since permutation matrices are not possible in this case.
 The results of the alignment tasks are stored in a database in the `results` folder.
 
+To evaluate the results, use the notebook `visualize_results`.
+
 ### Experimental Evaluation of the fGOT Framework (Section 4.3)
 The classification evaluation requires precomputed distance matrices. To compute the distance matrix for one strategy on one dataset, use the following command:
 
