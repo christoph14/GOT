@@ -70,7 +70,7 @@ def get_strategy(strategy_name, it, tau, n_samples, epochs, lr, seed=42, verbose
             if scale:
                 T *= np.sqrt(len(L1) * len(L2))
             return T
-    elif strategy_name.lower() == 'rrmw':
+    elif strategy_name.lower() == 'rrwm':
         # Reweighted Random Walks for Graph Matching
         def strategy(L1, L2):
             G1 = graph_from_laplacian(L1)
